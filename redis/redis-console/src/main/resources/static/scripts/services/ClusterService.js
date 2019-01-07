@@ -47,9 +47,59 @@ services.service('ClusterService', ['$resource', '$q', function ($resource, $q) 
         unbind_dc: {
             method: 'DELETE',
             url: '/console/clusters/:clusterName/dcs/:dcName'
+        },
+        get_all_organizations: {
+            method: 'GET',
+            url: '/console/organizations',
+            isArray : true
+        },
+        get_involved_organizations: {
+            method: 'GET',
+            url: '/console/involved/organizations',
+            isArray : true
+        },
+        get_unhealthy_clusters: {
+            method: 'GET',
+            url: '/console/clusters/unhealthy',
+            isArray: true
+        },
+        find_clusters_by_dc_name_bind :{
+            method: 'GET',
+            url: '/console/clusters/allBind/:dcName',
+            isArray: true
+        },
+        find_clusters_by_dc_name:{
+            method: 'GET',
+            url: '/console/clusters/activeDc/:dcName',
+            isArray: true
+        },
+        find_master_unhealthy_clusters: {
+            method: 'GET',
+            url: '/console/clusters/master/unhealthy/:level',
+            isArray: true
         }
     });
+    function getInvolvedOrgs() {
+        var d = $q.defer();
+        resource.get_involved_organizations({},
+            function(result) {
+                d.resolve(result);
+            }, function(result) {
+                d.reject(result);
+            });
+        return d.promise;
+    }
 
+    function getOrganizations() {
+        var d = $q.defer();
+        resource.get_all_organizations({},
+            function(result) {
+            d.resolve(result);
+        }, function(result) {
+            d.reject(result);
+        });
+        return d.promise;
+    }
     function getClustersCount() {
     	var d = $q.defer();
     	resource.get_clusters_count({},
@@ -193,6 +243,53 @@ services.service('ClusterService', ['$resource', '$q', function ($resource, $q) 
         return d.promise;
     }
 
+    function getUnhealthyClusters() {
+        var d = $q.defer();
+        resource.get_unhealthy_clusters({},
+            function (result) {
+                d.resolve(result);
+            }, function (result) {
+                d.reject(result);
+            });
+        return d.promise;
+    }
+
+    function findClustersByDcNameBind(dcName) {
+        var d = $q.defer();
+        resource.find_clusters_by_dc_name_bind(
+            {dcName: dcName},
+            function (result) {
+                d.resolve(result);
+            }, function (result) {
+                d.reject(result);
+            });
+        return d.promise;
+    }
+
+    function findClustersByDcName(dcName) {
+        var d = $q.defer();
+        resource.find_clusters_by_dc_name(
+            {dcName: dcName},
+            function (result) {
+                d.resolve(result);
+            }, function (result) {
+                d.reject(result);
+            });
+        return d.promise;
+    }
+
+    function getMasterUnhealthyClusters(level) {
+        var d = $q.defer();
+        resource.find_master_unhealthy_clusters (
+            {level: level},
+            function (result) {
+                d.resolve(result);
+            }, function (result) {
+                d.reject(result);
+            });
+        return d.promise;
+    }
+
     return {
         load_cluster: loadCluster,
         findClusterDCs: findClusterDCs,
@@ -204,6 +301,12 @@ services.service('ClusterService', ['$resource', '$q', function ($resource, $q) 
         findClusterBatch : findClusterBatch,
         getClustersCount : getClustersCount,
         bindDc: bindDc,
-        unbindDc: unbindDc
+        unbindDc: unbindDc,
+        getOrganizations: getOrganizations,
+        getInvolvedOrgs: getInvolvedOrgs,
+        getUnhealthyClusters: getUnhealthyClusters,
+        findClustersByDcNameBind: findClustersByDcNameBind,
+        findClustersByDcName : findClustersByDcName,
+        getMasterUnhealthyClusters : getMasterUnhealthyClusters
     }
 }]);

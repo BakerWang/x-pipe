@@ -1,11 +1,6 @@
 package com.ctrip.xpipe.redis.keeper.impl;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.ctrip.xpipe.api.endpoint.Endpoint;
 import com.ctrip.xpipe.api.lifecycle.Releasable;
 import com.ctrip.xpipe.api.observer.Observable;
 import com.ctrip.xpipe.api.observer.Observer;
@@ -16,6 +11,10 @@ import com.ctrip.xpipe.redis.keeper.RedisClient;
 import com.ctrip.xpipe.redis.keeper.RedisKeeperServer;
 import com.ctrip.xpipe.redis.keeper.RedisKeeperServer.PROMOTION_STATE;
 import com.ctrip.xpipe.redis.keeper.handler.PsyncHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 /**
  * @author wenchao.meng
@@ -28,19 +27,19 @@ public class RedisKeeperServerStateBackup extends AbstractRedisKeeperServerState
 		super(redisKeeperServer);
 	}
 	
-	public RedisKeeperServerStateBackup(RedisKeeperServer redisKeeperServer, InetSocketAddress masterAddress) {
+	public RedisKeeperServerStateBackup(RedisKeeperServer redisKeeperServer, Endpoint masterAddress) {
 		super(redisKeeperServer, masterAddress);
 	}
 
 
 
 	@Override
-	public void becomeBackup(InetSocketAddress masterAddress) {
+	public void becomeBackup(Endpoint masterAddress) {
 		setMasterAddress(masterAddress);
 	}
 
 	@Override
-	public void becomeActive(InetSocketAddress masterAddress) {
+	public void becomeActive(Endpoint masterAddress) {
 		
 		logger.info("[becomeActive]{}", masterAddress);
 		doBecomeActive(masterAddress);

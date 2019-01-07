@@ -8,7 +8,11 @@ import com.ctrip.xpipe.utils.UrlUtils;
  *         Dec 22, 2016
  */
 public enum CREDIS_SERVICE {
-	MIGRATION_PUBLISH(PATH.PATH_MIGRATION_PUBLISH);
+
+	MIGRATION_PUBLISH(PATH.PATH_MIGRATION_PUBLISH),
+	SWITCH_STATUS(PATH.PATH_SWITCH_STATUS),
+	QUERY_STATUS(PATH.PATH_QUERY_STATUS),
+	QUERY_CLUSTER(PATH.PATH_QUERY_CLUSTER);
 
 	private String path;
 
@@ -29,8 +33,11 @@ public enum CREDIS_SERVICE {
 	}
 
 	public static class PATH {
-		public static final String PATH_PREFIX = "/";
 
-		public static final String PATH_MIGRATION_PUBLISH = "/KeeperApi/primarydc/{clusterName}/{primaryDcName}";
+		public static final String PATH_PREFIX = "/";
+		public static final String PATH_MIGRATION_PUBLISH = "/keeperApi/primarydc/{clusterName}/{primaryDcName}";
+		public static final String PATH_SWITCH_STATUS  = "/keeperApi/switchReadStatus";
+		public static final String PATH_QUERY_STATUS = "keeperApi/queryReadStatus";
+		public static final String PATH_QUERY_CLUSTER = "keeperApi/querycluster";
 	}
 }

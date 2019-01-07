@@ -1,14 +1,10 @@
 package com.ctrip.xpipe.redis.meta.server.meta;
 
+import com.ctrip.xpipe.api.observer.Observable;
+import com.ctrip.xpipe.redis.core.entity.*;
+
 import java.util.List;
 import java.util.Set;
-
-import com.ctrip.xpipe.api.observer.Observable;
-import com.ctrip.xpipe.redis.core.entity.ClusterMeta;
-import com.ctrip.xpipe.redis.core.entity.KeeperContainerMeta;
-import com.ctrip.xpipe.redis.core.entity.KeeperMeta;
-import com.ctrip.xpipe.redis.core.entity.RedisMeta;
-import com.ctrip.xpipe.redis.core.entity.SentinelMeta;
 
 /**
  * @author wenchao.meng
@@ -22,6 +18,8 @@ public interface DcMetaCache extends Observable {
 	String getCurrentDc();
 
 	ClusterMeta getClusterMeta(String clusterId);
+
+	RouteMeta randomRoute(String clusterId);
 
 	KeeperContainerMeta getKeeperContainer(KeeperMeta keeperMeta);
 

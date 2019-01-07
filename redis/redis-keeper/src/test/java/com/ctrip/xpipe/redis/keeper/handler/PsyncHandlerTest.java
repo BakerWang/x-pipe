@@ -1,14 +1,5 @@
 package com.ctrip.xpipe.redis.keeper.handler;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import static org.mockito.Mockito.*;
-
 import com.ctrip.xpipe.redis.core.redis.RunidGenerator;
 import com.ctrip.xpipe.redis.keeper.AbstractRedisKeeperTest;
 import com.ctrip.xpipe.redis.keeper.KeeperRepl;
@@ -16,6 +7,14 @@ import com.ctrip.xpipe.redis.keeper.RedisKeeperServer;
 import com.ctrip.xpipe.redis.keeper.RedisSlave;
 import com.ctrip.xpipe.redis.keeper.config.KeeperConfig;
 import com.ctrip.xpipe.redis.keeper.monitor.impl.DefaultKeeperMonitor;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import static org.mockito.Mockito.when;
 
 /**
  * @author wenchao.meng
@@ -56,7 +55,7 @@ public class PsyncHandlerTest extends AbstractRedisKeeperTest{
 		
 		when(redisSlave.getRedisKeeperServer()).thenReturn(redisKeeperServer);
 		when(redisKeeperServer.getKeeperRepl()).thenReturn(keeperRepl);
-		when(redisKeeperServer.getKeeperMonitor()).thenReturn(new DefaultKeeperMonitor(redisKeeperServer));
+		when(redisKeeperServer.getKeeperMonitor()).thenReturn(new DefaultKeeperMonitor(redisKeeperServer, scheduled));
 		when(redisKeeperServer.getKeeperConfig()).thenReturn(KeeperConfig);
 
 		when(keeperRepl.getBeginOffset()).thenReturn(begin);

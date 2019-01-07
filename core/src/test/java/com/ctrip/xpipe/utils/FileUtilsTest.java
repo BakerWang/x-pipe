@@ -1,15 +1,14 @@
 package com.ctrip.xpipe.utils;
 
 
+import com.ctrip.xpipe.AbstractTest;
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-
-import org.junit.Assert;
-import org.junit.Test;
-
-import com.ctrip.xpipe.AbstractTest;
 
 /**
  * @author wenchao.meng
@@ -17,11 +16,24 @@ import com.ctrip.xpipe.AbstractTest;
  * Aug 8, 2016
  */
 public class FileUtilsTest extends AbstractTest{
+
+	@Test
+	public void testLength(){
+
+		File file = new File("/tmp/notexist");
+		if(file.exists()){
+			logger.info("exist");
+			return;
+		}
+
+		logger.info("{}", file.length());
+
+	}
 	
 	@Test
 	public void test() throws FileNotFoundException{
 		
-		Assert.assertNotNull(FileUtils.getFileInputStream("fileutiltest.txt"));;
+		Assert.assertNotNull(FileUtils.getFileInputStream("fileutiltest.txt"));
 
 		try{
 			FileUtils.getFileInputStream("fileutiltest_not_exist.txt");

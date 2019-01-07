@@ -1,16 +1,19 @@
 package com.ctrip.xpipe.redis.integratedtest.keeper;
 
-import org.unidal.tuple.Pair;
-
 import com.ctrip.xpipe.api.command.CommandFuture;
 import com.ctrip.xpipe.redis.core.entity.KeeperMeta;
 import com.ctrip.xpipe.redis.core.entity.RedisMeta;
 import com.ctrip.xpipe.redis.core.meta.KeeperState;
 import com.ctrip.xpipe.redis.core.protocal.cmd.AbstractKeeperCommand.KeeperGetStateCommand;
 import com.ctrip.xpipe.redis.core.protocal.cmd.AbstractKeeperCommand.KeeperSetStateCommand;
+import com.ctrip.xpipe.redis.core.proxy.ProxyResourceManager;
+import com.ctrip.xpipe.redis.core.proxy.endpoint.DefaultProxyEndpointManager;
+import com.ctrip.xpipe.redis.core.proxy.endpoint.NaiveNextHopAlgorithm;
+import com.ctrip.xpipe.redis.core.proxy.resource.KeeperProxyResourceManager;
 import com.ctrip.xpipe.redis.integratedtest.AbstractIntegratedTest;
 import com.ctrip.xpipe.redis.keeper.config.KeeperConfig;
 import com.ctrip.xpipe.redis.keeper.config.TestKeeperConfig;
+import com.ctrip.xpipe.tuple.Pair;
 
 /**
  * @author wenchao.meng
@@ -23,12 +26,9 @@ public abstract class AbstractKeeperIntegrated extends AbstractIntegratedTest{
 	private int replicationStoreCommandFileNumToKeep = 2;
 	private int replicationStoreMaxCommandsToTransferBeforeCreateRdb = 1024;
 	private int minTimeMilliToGcAfterCreate = 2000;
-	
 
-	@Override
-	protected String getRedisTemplate() {
-		return "conf/redis_raw.conf";
-	}
+	protected ProxyResourceManager proxyResourceManager = new KeeperProxyResourceManager(
+			new DefaultProxyEndpointManager(()->1000), new NaiveNextHopAlgorithm());
 
 	protected KeeperMeta getKeeperActive(RedisMeta redisMeta) {
 		

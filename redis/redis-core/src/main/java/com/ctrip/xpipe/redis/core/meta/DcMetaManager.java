@@ -1,17 +1,9 @@
 package com.ctrip.xpipe.redis.core.meta;
 
+import com.ctrip.xpipe.redis.core.entity.*;
+
 import java.util.List;
 import java.util.Set;
-
-import com.ctrip.xpipe.redis.core.entity.ClusterMeta;
-import com.ctrip.xpipe.redis.core.entity.DcMeta;
-import com.ctrip.xpipe.redis.core.entity.KeeperContainerMeta;
-import com.ctrip.xpipe.redis.core.entity.KeeperMeta;
-import com.ctrip.xpipe.redis.core.entity.MetaServerMeta;
-import com.ctrip.xpipe.redis.core.entity.RedisMeta;
-import com.ctrip.xpipe.redis.core.entity.SentinelMeta;
-import com.ctrip.xpipe.redis.core.entity.ShardMeta;
-import com.ctrip.xpipe.redis.core.entity.ZkServerMeta;
 
 /**
  * @author wenchao.meng
@@ -19,9 +11,24 @@ import com.ctrip.xpipe.redis.core.entity.ZkServerMeta;
  * Jul 7, 2016
  */
 public interface DcMetaManager{
-	
+
+	/**
+	 * if no route found return null
+	 * @param clusterId
+	 * @return
+	 */
+	RouteMeta randomRoute(String clusterId);
+
+	/**
+	 * find all clusters in currentDc whose active dc is clusterActiveDc
+	 * @param clusterActiveDc
+	 * @return
+	 */
+	List<ClusterMeta> getSpecificActiveDcClusters(String clusterActiveDc);
+
+
 	Set<String> getClusters();
-	
+
 	boolean hasCluster(String clusterId);
 	
 	boolean hasShard(String clusterId, String shardId);

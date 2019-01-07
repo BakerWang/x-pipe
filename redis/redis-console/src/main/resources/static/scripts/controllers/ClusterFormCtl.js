@@ -20,6 +20,8 @@ index_module.controller('ClusterFromCtl',
                              $scope.shards = [];
                              $scope.currentShard = {};
                              $scope.sentinels = {};
+                             $scope.organizations = [];
+                             $scope.organizationNames = [];
 
                              $scope.doCluster = doCluster;
                              $scope.getDcName = getDcName;
@@ -32,7 +34,7 @@ index_module.controller('ClusterFromCtl',
                              $scope.deleteShard = deleteShard;
                              $scope.activeDcSelected = activeDcSelected;
                              $scope.shardNameChanged = shardNameChanged;
-                             
+
                              init();
 
                              function init() {
@@ -48,6 +50,14 @@ index_module.controller('ClusterFromCtl',
                                         });
                                         
                                     });
+                                ClusterService.getOrganizations()
+                                .then(function (result) {
+                                     $scope.organizations = result;
+                                    $scope.organizationNames = result.map(function (org) {
+                                        return org.orgName;
+                                    });
+                                     console.log($scope.organizationNames);
+                                 });
 
                                  if ($scope.operateType != OPERATE_TYPE.CREATE) {
                                      ClusterService.load_cluster(clusterName)
@@ -186,7 +196,11 @@ index_module.controller('ClusterFromCtl',
                              function shardNameChanged() {
                             	 if($scope.cluster) {
                             		 if($scope.currentShard) {
-                            			 $scope.currentShard.setinelMonitorName = $scope.cluster.clusterName + '-' + $scope.currentShard.shardName;
+                            		     if($scope.currentShard.shardName.indexOf($scope.cluster.clusterName) >=0 ){
+                            			    $scope.currentShard.setinelMonitorName = $scope.currentShard.shardName;
+                            			 }else{
+                            			    $scope.currentShard.setinelMonitorName = $scope.cluster.clusterName + $scope.currentShard.shardName;
+                            			 }
                             		 }
                             	 }
                              }

@@ -1,14 +1,14 @@
 package com.ctrip.xpipe.redis.keeper.handler;
 
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.ctrip.xpipe.redis.core.protocal.protocal.RedisErrorParser;
 import com.ctrip.xpipe.redis.keeper.CommandHandler;
 import com.ctrip.xpipe.redis.keeper.RedisClient;
 import com.ctrip.xpipe.utils.StringUtil;
+
+import java.util.Arrays;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -38,6 +38,7 @@ public class CommandHandlerManager extends AbstractCommandHandler{
 		putHandler(new SubscribeCommandHandler());
 		putHandler(new ClientCommandHandler());
 		putHandler(new RoleCommandHandler());
+		putHandler(new ProxyCommandHandler());
 	}
 
 	private void putHandler(CommandHandler handler) {
@@ -47,7 +48,7 @@ public class CommandHandlerManager extends AbstractCommandHandler{
 			handlers.put(commandName.toLowerCase(), handler);
 		}
 	}
-	
+
 	@Override
 	public String[] getCommands() {		
 		return handlers.keySet().toArray(new String[handlers.size()]);
@@ -61,11 +62,10 @@ public class CommandHandlerManager extends AbstractCommandHandler{
 		}
 
 
-		redisClient.processCommandSequentially(new Runnable() {
+		redisClient.getRedisKeeperServer().processCommandSequentially(new Runnable() {
 
 			@Override
 			public void run() {
-				
 				try {
 					CommandHandler handler = handlers.get(args[0].toLowerCase());
 					if (handler == null) {
@@ -80,6 +80,10 @@ public class CommandHandlerManager extends AbstractCommandHandler{
 				}
 			}
 
+			@Override
+			public String toString() {
+				return String.format("%s, %s", redisClient, StringUtil.join(" ", args));
+			}
 		});
 	}
 	

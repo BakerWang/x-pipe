@@ -1,14 +1,25 @@
 -- Xpipe DB Demo
 
+-- ZONE Table
+drop table if exists ZONE_TBL;
+create table ZONE_TBL
+(
+	id bigint unsigned not null auto_increment primary key ,
+	zone_name varchar(128) not null unique,
+	DataChange_LastTime timestamp default CURRENT_TIMESTAMP,
+	deleted tinyint(1) not null default 0
+);
+
 -- DC Table
 drop table if exists DC_TBL;
 create table DC_TBL
 (
-	id bigint unsigned not null auto_increment primary key ,
+	id bigint unsigned not null auto_increment primary key,
+	zone_id bigint unsigned not null,
 	dc_name varchar(128) not null unique, 
 	dc_active tinyint(1) not null default 1,
 	dc_description varchar(1024) not null default 'nothing',
-    dc_last_modified_time varchar(40) not null default '',
+  dc_last_modified_time varchar(40) not null default '',
 	DataChange_LastTime timestamp default CURRENT_TIMESTAMP,
 	deleted tinyint(1) not null default 0
 );
@@ -53,7 +64,10 @@ create table CLUSTER_TBL
     status varchar(24) not null default 'normal',
     DataChange_LastTime timestamp default CURRENT_TIMESTAMP,
 	deleted tinyint(1) not null default 0,
-	is_xpipe_interested tinyint(1) default 0
+	is_xpipe_interested tinyint(1) default 0,
+	cluster_org_id bigint unsigned not null default 0,
+    cluster_admin_emails varchar(250) default ' ',
+    `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'cluster create time',
 );
 
 
@@ -126,7 +140,8 @@ create table KEEPERCONTAINER_TBL
 	keepercontainer_port int not null,
 	keepercontainer_active tinyint(1) not null default 1,
     DataChange_LastTime timestamp default CURRENT_TIMESTAMP,
-	deleted tinyint(1) not null default 0
+	deleted tinyint(1) not null default 0,
+	keepercontainer_org_id bigint(20) unsigned NOT NULL DEFAULT 0
 );
 
 -- Migration Event Table
@@ -136,7 +151,7 @@ create table MIGRATION_EVENT_TBL
 	id bigint unsigned not null auto_increment primary key,
 	start_time timestamp default CURRENT_TIMESTAMP,
 	operator varchar(128) not null default 'xpipe',
-	event_tag varchar(150) not null unique,
+	event_tag varchar(150) not null,
 	DataChange_LastTime timestamp default CURRENT_TIMESTAMP,
 	deleted tinyint(1) not null default 0
 );
@@ -165,7 +180,76 @@ create table MIGRATION_SHARD_TBL
 	id bigint unsigned not null auto_increment primary key,
 	migration_cluster_id bigint unsigned not null default 0,
 	shard_id bigint unsigned not null default 0,
-	log varchar(10240) not null default '',
+	log varchar(20480) not null default '',
 	DataChange_LastTime timestamp default CURRENT_TIMESTAMP,
 	deleted tinyint(1) not null default 0
+);
+
+
+-- Config Table
+drop table if exists config_tbl;
+CREATE TABLE `config_tbl` (
+  id bigint unsigned NOT NULL AUTO_INCREMENT primary key,
+  key varchar(128) NOT NULL DEFAULT '' unique,
+  value varchar(1024) DEFAULT '' ,
+  until TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  latest_update_user varchar(512) DEFAULT '',
+  latest_update_ip varchar(128) DEFAULT '',
+  desc varchar(1024) NOT NULL DEFAULT '' ,
+  DataChange_LastTime timestamp DEFAULT CURRENT_TIMESTAMP,
+  deleted tinyint(4) NOT NULL DEFAULT 0,
+);
+INSERT INTO config_tbl (`key`, `value`, `desc`) VALUES ('sentinel.auto.process', 'true', '自动增删哨兵');
+INSERT INTO config_tbl (`key`, `value`, `desc`) VALUES ('alert.system.on', 'true', '邮件报警系统开关');
+
+-- Organization Table
+drop table if exists organization_tbl;
+CREATE TABLE `organization_tbl` (
+  id bigint(20) unsigned not null AUTO_INCREMENT primary key,
+  org_id  bigint(20) unsigned not null default 0 unique,
+  org_name varchar(250) not null default 'none' unique,
+  DataChange_LastTime timestamp default CURRENT_TIMESTAMP,
+  deleted tinyint(4) not null default 0,
+);
+INSERT INTO organization_tbl (`org_id`, `org_name`) VALUES ('0', '');
+
+-- Event Table
+drop table if exists event_tbl;
+CREATE TABLE EVENT_TBL (
+  `id` bigint unsigned not null AUTO_INCREMENT primary key,
+  `event_type`  varchar(20) not null default 'none',
+  `event_operator` varchar(128) not null default  'none',
+  `event_operation` varchar(120) not null default  'none',
+  `event_detail` varchar(512) not null default  'none',
+  `event_property` varchar(512) not null default  'none',
+  `DataChange_LastTime` timestamp default CURRENT_TIMESTAMP,
+  `deleted` tinyint(4) not null default 0,
+);
+
+-- Route Table
+drop table if exists route_tbl;
+CREATE TABLE `route_tbl` (
+  `id` bigint unsigned not null AUTO_INCREMENT primary key,
+  `route_org_id` bigint(20) unsigned not null default 0,
+  `src_dc_id` bigint(20) unsigned not null,
+  `dst_dc_id` bigint(20) unsigned not null,
+  `src_proxy_ids` varchar(128) not null default '',
+  `dst_proxy_ids` varchar(128) not null default '',
+  `optional_proxy_ids` varchar(128) not null default '',
+  `active` tinyint(1) not null default 1,
+  `tag` varchar(128) not null default 'META',
+  `DataChange_LastTime` timestamp default CURRENT_TIMESTAMP,
+  `deleted` tinyint(4) not null default 0,
+);
+
+-- Proxy Table
+drop table if exists proxy_tbl;
+CREATE TABLE `proxy_tbl` (
+  `id` bigint unsigned  not null AUTO_INCREMENT primary key,
+  `dc_id` bigint(20) unsigned not null default 0,
+  `uri` varchar(128) not null default '',
+  `active` tinyint(1) not null default 1,
+  `monitor_active` tinyint(1) not null default 0,
+  `DataChange_LastTime` timestamp default CURRENT_TIMESTAMP,
+  `deleted` tinyint(4) not null default 0,
 );

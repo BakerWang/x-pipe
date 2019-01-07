@@ -1,15 +1,5 @@
 package com.ctrip.xpipe.redis.meta.server.keeper.manager;
 
-import java.util.concurrent.ScheduledExecutorService;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-
-import org.mockito.runners.MockitoJUnitRunner;
-
 import com.ctrip.xpipe.api.command.Command;
 import com.ctrip.xpipe.command.TestCommand;
 import com.ctrip.xpipe.lifecycle.LifecycleHelper;
@@ -17,6 +7,15 @@ import com.ctrip.xpipe.redis.core.entity.KeeperMeta;
 import com.ctrip.xpipe.redis.core.entity.KeeperTransMeta;
 import com.ctrip.xpipe.redis.core.keeper.container.KeeperContainerService;
 import com.ctrip.xpipe.redis.meta.server.AbstractMetaServerTest;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author wenchao.meng
@@ -60,6 +59,8 @@ public class DefaultKeeperStateControllerTest extends AbstractMetaServerTest{
 			}
 			
 		};
+
+		defaultKeeperStateController.setExecutors(executors);
 		LifecycleHelper.initializeIfPossible(defaultKeeperStateController);
 		LifecycleHelper.startIfPossible(defaultKeeperStateController);
 		
@@ -74,18 +75,17 @@ public class DefaultKeeperStateControllerTest extends AbstractMetaServerTest{
 		Assert.assertFalse(addCommand.isBeginExecute());
 		
 		defaultKeeperStateController.addKeeper(new KeeperTransMeta(getClusterId(), getShardId(), new KeeperMeta()));
-		sleep(10);
+		sleep(50);
 		Assert.assertTrue(addCommand.isBeginExecute());
 		
 	}
 
 	@Test
-	public void testDelete(){
+	public void testDelete() throws TimeoutException {
 	
 		Assert.assertFalse(deleteCommand.isBeginExecute());
 		defaultKeeperStateController.removeKeeper(new KeeperTransMeta(getClusterId(), getShardId(), new KeeperMeta()));
-		sleep(10);
-		Assert.assertTrue(deleteCommand.isBeginExecute());
+		waitConditionUntilTimeOut(() -> deleteCommand.isBeginExecute(), 1000);
 	}
 
 }

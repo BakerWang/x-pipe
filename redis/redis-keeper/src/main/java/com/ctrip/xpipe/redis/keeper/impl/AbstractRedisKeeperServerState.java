@@ -1,11 +1,5 @@
 package com.ctrip.xpipe.redis.keeper.impl;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ctrip.xpipe.api.endpoint.Endpoint;
 import com.ctrip.xpipe.endpoint.DefaultEndPoint;
 import com.ctrip.xpipe.redis.core.entity.KeeperMeta;
@@ -13,9 +7,13 @@ import com.ctrip.xpipe.redis.core.entity.RedisMeta;
 import com.ctrip.xpipe.redis.core.meta.ShardStatus;
 import com.ctrip.xpipe.redis.core.store.ReplicationStore;
 import com.ctrip.xpipe.redis.keeper.RedisKeeperServer;
+import com.ctrip.xpipe.redis.keeper.RedisKeeperServer.PROMOTION_STATE;
 import com.ctrip.xpipe.redis.keeper.RedisKeeperServerState;
 import com.ctrip.xpipe.utils.ObjectUtils;
-import com.ctrip.xpipe.redis.keeper.RedisKeeperServer.PROMOTION_STATE;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 /**
  * @author wenchao.meng
@@ -26,7 +24,7 @@ public abstract class AbstractRedisKeeperServerState implements RedisKeeperServe
 
 	protected Logger logger = LoggerFactory.getLogger(getClass());
 	
-	protected InetSocketAddress masterAddress;
+	protected Endpoint masterAddress;
 	
 	protected RedisKeeperServer redisKeeperServer;
 	
@@ -34,7 +32,7 @@ public abstract class AbstractRedisKeeperServerState implements RedisKeeperServe
 		this(redisKeeperServer, null);
 	}
 
-	public AbstractRedisKeeperServerState(RedisKeeperServer redisKeeperServer, InetSocketAddress masterAddress){
+	public AbstractRedisKeeperServerState(RedisKeeperServer redisKeeperServer, Endpoint masterAddress){
 		
 		this.redisKeeperServer = redisKeeperServer;
 		this.masterAddress = masterAddress;
@@ -42,11 +40,7 @@ public abstract class AbstractRedisKeeperServerState implements RedisKeeperServe
 
 	@Override
 	public Endpoint getMaster() {
-		
-		if(masterAddress == null){
-			return null;
-		}
-		return new DefaultEndPoint(masterAddress);
+		return masterAddress;
 	}
 
 
@@ -72,22 +66,22 @@ public abstract class AbstractRedisKeeperServerState implements RedisKeeperServe
 			RedisMeta redisMaster = shardStatus.getRedisMaster();
 			KeeperMeta upstreamKeeer = shardStatus.getUpstreamKeeper();
 			
-			InetSocketAddress masterAddress = null;
+			Endpoint masterAddress = null;
 			if(redisMaster != null){
-				masterAddress = new InetSocketAddress(redisMaster.getIp(), redisMaster.getPort());
+				masterAddress = new DefaultEndPoint(redisMaster.getIp(), redisMaster.getPort());
 			}
 			
 			if(upstreamKeeer != null){
-				masterAddress = new InetSocketAddress(upstreamKeeer.getIp(), upstreamKeeer.getPort());
+				masterAddress = new DefaultEndPoint(upstreamKeeer.getIp(), upstreamKeeer.getPort());
 			}
 			becomeActive(masterAddress);
 		}else{
-			becomeBackup(new InetSocketAddress(activeKeeper.getIp(), activeKeeper.getPort()));
+			becomeBackup(new DefaultEndPoint(activeKeeper.getIp(), activeKeeper.getPort()));
 		}
 	}
 
 	@Override
-	public void setMasterAddress(InetSocketAddress masterAddress) {
+	public void setMasterAddress(Endpoint masterAddress) {
 		
 		if(ObjectUtils.equals(this.masterAddress, masterAddress)){
 			logger.info("[setMasterAddress][master address unchanged]{},{}", this.masterAddress, masterAddress);
@@ -128,7 +122,7 @@ public abstract class AbstractRedisKeeperServerState implements RedisKeeperServe
 		logger.info("[initPromotionState][nothing to do]");
 	}
 	
-	protected void doBecomeBackup(InetSocketAddress masterAddress){
+	protected void doBecomeBackup(Endpoint masterAddress){
 		
 		logger.info("[doBecomeBackup]{}", this);
 		try{
@@ -140,7 +134,7 @@ public abstract class AbstractRedisKeeperServerState implements RedisKeeperServe
 		reconnectMaster();
 	}
 
-	protected void doBecomeActive(InetSocketAddress masterAddress){
+	protected void doBecomeActive(Endpoint masterAddress){
 		
 		logger.info("[doBecomeActive]{}", this);
 		try{
@@ -153,4 +147,8 @@ public abstract class AbstractRedisKeeperServerState implements RedisKeeperServe
 		reconnectMaster();
 	}
 
+	@Override
+	public boolean handleSlaveOf() {
+		return false;
+	}
 }

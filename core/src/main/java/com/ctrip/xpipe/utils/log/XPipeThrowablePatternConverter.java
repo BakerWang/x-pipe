@@ -1,6 +1,7 @@
 package com.ctrip.xpipe.utils.log;
 
 
+import com.ctrip.xpipe.exception.ExceptionUtils;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.apache.logging.log4j.core.impl.ThrowableProxy;
@@ -9,8 +10,6 @@ import org.apache.logging.log4j.core.pattern.PatternConverter;
 import org.apache.logging.log4j.core.pattern.ThrowablePatternConverter;
 import org.apache.logging.log4j.core.util.Constants;
 
-import com.ctrip.xpipe.exception.ExceptionUtils;
-
 /**
  * @author wenchao.meng
  *
@@ -18,7 +17,7 @@ import com.ctrip.xpipe.exception.ExceptionUtils;
  */
 @Plugin(name = "XpipeThrowablePatternConverter", category = PatternConverter.CATEGORY)
 @ConverterKeys({ "xpEx", "xpThrowable", "xpException" })
-public class XPipeThrowablePatternConverter extends ThrowablePatternConverter{
+public final class XPipeThrowablePatternConverter extends ThrowablePatternConverter{
 	
     /**
      * Private constructor.

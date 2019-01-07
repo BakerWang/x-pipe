@@ -1,12 +1,13 @@
 package com.ctrip.xpipe.simple;
 
-import java.io.IOException;
-
-import org.junit.Test;
-
 import com.ctrip.xpipe.AbstractTest;
 import com.ctrip.xpipe.monitor.CatConfig;
 import com.dianping.cat.Cat;
+import org.apache.commons.lang3.SerializationException;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.io.IOException;
 
 /**
  * @author wenchao.meng
@@ -18,8 +19,7 @@ public class CatTest extends AbstractTest{
 	@Test
 	public void testLog() throws IOException{
 		
-		System.setProperty(CatConfig.CAT_ENABLED_KEY, "true");
-		
+
 		Cat.getProducer().logError(new Exception());
 		
 		waitForAnyKeyToExit();
@@ -36,5 +36,24 @@ public class CatTest extends AbstractTest{
 		System.setProperty(CatConfig.CAT_ENABLED_KEY, "false");
 		Cat.newTransaction("test", "test");
 	}
+
+	@BeforeClass
+	public static void beforeCatTest(){
+		System.setProperty(CatConfig.CAT_ENABLED_KEY, "true");
+	}
+
+	@Test
+	/**
+	 * -Dlog4j.configurationFile=log4j2cat.xml
+	 */
+	public void testException() throws IOException {
+
+		logger.error("[testException]", new SerializationException("exception"));
+
+		waitForAnyKeyToExit();
+
+	}
+
+
 
 }

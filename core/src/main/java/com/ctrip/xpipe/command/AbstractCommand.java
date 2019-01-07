@@ -1,16 +1,15 @@
 package com.ctrip.xpipe.command;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicReference;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ctrip.xpipe.api.command.Command;
 import com.ctrip.xpipe.api.command.CommandFuture;
 import com.ctrip.xpipe.api.command.CommandFutureListener;
 import com.ctrip.xpipe.exception.ExceptionUtils;
 import com.google.common.util.concurrent.MoreExecutors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author wenchao.meng
@@ -40,6 +39,11 @@ public abstract class AbstractCommand<V> implements Command<V>{
 
 	@Override
 	public CommandFuture<V> execute(Executor executors) {
+
+		if(future().isDone()){
+			logger.info("[execute][already done, reset]{}, {}", this, future().getNow());
+			reset();
+		}
 		
 		future().addListener(new CommandFutureListener<V>() {
 
@@ -60,6 +64,8 @@ public abstract class AbstractCommand<V> implements Command<V>{
 				}catch(Exception e){
 					if(!future().isDone()){
 						future().setFailure(e);
+					}else {
+						logger.error("[execute][done, but exception]" + this, e);
 					}
 				}
 			}
@@ -97,7 +103,7 @@ public abstract class AbstractCommand<V> implements Command<V>{
 
 	@Override
 	public String toString() {
-		return "Command:" + getName();
+		return String.format("CMD[%s]", getName());
 	}
 	
 }

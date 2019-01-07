@@ -1,18 +1,18 @@
 package com.ctrip.xpipe.utils;
 
 
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.channels.ClosedChannelException;
-import java.nio.channels.FileChannel;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-
+import com.ctrip.xpipe.api.utils.ControllableFile;
+import com.ctrip.xpipe.exception.XpipeRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ctrip.xpipe.api.utils.ControllableFile;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author wenchao.meng
@@ -58,24 +58,22 @@ public abstract class AbstractControllableFile implements ControllableFile{
 	}
 
 	@Override
-	public long size() throws IOException {
-		
-		return size(0);
+	public long size() {
+
+		try {
+			return getFileChannel().size();
+		} catch (FileNotFoundException e){
+			throw new XpipeRuntimeException(String.format("file not found:%s", file), e);
+		} catch (IOException e) {
+			logger.warn("error get file size, use file.length:" + file, e);
+		}
+
+		if(!file.exists()){
+			throw new XpipeRuntimeException(String.format("file not found:%s", file));
+		}
+		return file.length();
 	}
 	
-	private long size(int depth) throws IOException {
-		
-		try{
-			return getFileChannel().size();
-		}catch(ClosedChannelException e){
-			if(depth < 2){
-				logger.info("[size][closed, reopen]{}", e);
-				return size(depth + 1);
-			}
-			throw e;
-		}
-	}
-
 	protected void tryOpen() throws IOException{
 		
 		if(randomAccessFile.get() == null){
@@ -94,7 +92,7 @@ public abstract class AbstractControllableFile implements ControllableFile{
 		
 		logger.debug("[doOpen]{}", file);
 		closed.set(false);
-		randomAccessFile.set(new RandomAccessFile(file, "rw"));;
+		randomAccessFile.set(new RandomAccessFile(file, "rw"));
 		FileChannel fileChannel = randomAccessFile.get().getChannel();
 		fileChannel.position(fileChannel.size());
 	}

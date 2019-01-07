@@ -1,31 +1,34 @@
 package com.ctrip.xpipe.redis.meta.server.keeper;
 
-import java.net.InetSocketAddress;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-
-import javax.annotation.Resource;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.unidal.tuple.Pair;
-
+import com.ctrip.xpipe.api.endpoint.Endpoint;
 import com.ctrip.xpipe.api.lifecycle.TopElement;
 import com.ctrip.xpipe.api.pool.SimpleKeyedObjectPool;
+import com.ctrip.xpipe.concurrent.DefaultExecutorFactory;
 import com.ctrip.xpipe.concurrent.KeyedOneThreadTaskExecutor;
 import com.ctrip.xpipe.lifecycle.AbstractLifecycle;
 import com.ctrip.xpipe.netty.commands.NettyClient;
 import com.ctrip.xpipe.redis.core.entity.KeeperMeta;
 import com.ctrip.xpipe.redis.core.entity.RedisMeta;
+import com.ctrip.xpipe.redis.core.entity.RouteMeta;
 import com.ctrip.xpipe.redis.meta.server.MetaServerStateChangeHandler;
-import com.ctrip.xpipe.redis.meta.server.job.KeeperStateChangeJob;
 import com.ctrip.xpipe.redis.meta.server.job.DefaultSlaveOfJob;
+import com.ctrip.xpipe.redis.meta.server.job.KeeperStateChangeJob;
 import com.ctrip.xpipe.redis.meta.server.meta.CurrentMetaManager;
 import com.ctrip.xpipe.redis.meta.server.meta.DcMetaCache;
 import com.ctrip.xpipe.redis.meta.server.spring.MetaServerContextConfig;
+import com.ctrip.xpipe.spring.AbstractSpringConfigContext;
+import com.ctrip.xpipe.tuple.Pair;
+import com.ctrip.xpipe.utils.OsUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * @author wenchao.meng
@@ -38,11 +41,13 @@ public class DefaultKeeperStateChangeHandler extends AbstractLifecycle implement
 	protected static Logger logger = LoggerFactory.getLogger(DefaultKeeperStateChangeHandler.class);
 
 	@Resource(name = MetaServerContextConfig.CLIENT_POOL)
-	private SimpleKeyedObjectPool<InetSocketAddress, NettyClient> clientPool;
+	private SimpleKeyedObjectPool<Endpoint, NettyClient> clientPool;
 
-	@Resource(name = MetaServerContextConfig.SCHEDULED_EXECUTOR)
+	@Resource(name = AbstractSpringConfigContext.SCHEDULED_EXECUTOR)
 	private ScheduledExecutorService scheduled;
-	
+
+	private ExecutorService executors;
+
 	private KeyedOneThreadTaskExecutor<Pair<String, String>> keyedOneThreadTaskExecutor;
 
 	@Autowired
@@ -54,7 +59,8 @@ public class DefaultKeeperStateChangeHandler extends AbstractLifecycle implement
 	@Override
 	protected void doInitialize() throws Exception {
 		super.doInitialize();
-		keyedOneThreadTaskExecutor = new KeyedOneThreadTaskExecutor<>("KeeperStateChangeHandler");
+		executors = DefaultExecutorFactory.createAllowCoreTimeout("KeeperStateChangeHandler", OsUtils.defaultMaxCoreThreadCount()).createExecutorService();
+		keyedOneThreadTaskExecutor = new KeyedOneThreadTaskExecutor<>(executors);
 	}
 	
 	@Override
@@ -76,11 +82,19 @@ public class DefaultKeeperStateChangeHandler extends AbstractLifecycle implement
 		List<KeeperMeta> keepers = new LinkedList<>();
 		keepers.add(activeKeeper);
 		
-		keyedOneThreadTaskExecutor.execute(new Pair<String, String>(clusterId, shardId), new KeeperStateChangeJob(keepers, newMaster, clientPool, scheduled));
+		keyedOneThreadTaskExecutor.execute(
+				new Pair<String, String>(clusterId, shardId),
+				createKeeperStateChangeJob(clusterId, keepers, newMaster));
+	}
+
+	private KeeperStateChangeJob createKeeperStateChangeJob(String clusterId, List<KeeperMeta> keepers, Pair<String, Integer> master) {
+
+		RouteMeta routeMeta = currentMetaManager.randomRoute(clusterId);
+		return new KeeperStateChangeJob(keepers, master, routeMeta, clientPool, scheduled, executors);
 	}
 
 	@Override
-	public void keeperActiveElected(String clusterId, String shardId, KeeperMeta activeKeeper) throws Exception {
+	public void keeperActiveElected(String clusterId, String shardId, KeeperMeta activeKeeper) {
 
 		logger.info("[keeperActiveElected]{},{},{}", clusterId, shardId, activeKeeper);
 
@@ -90,13 +104,14 @@ public class DefaultKeeperStateChangeHandler extends AbstractLifecycle implement
 			return;
 		}
 		Pair<String, Integer> activeKeeperMaster = currentMetaManager.getKeeperMaster(clusterId, shardId);
-		KeeperStateChangeJob keeperStateChangeJob = new KeeperStateChangeJob(keepers, activeKeeperMaster, clientPool, scheduled);
+
+		KeeperStateChangeJob keeperStateChangeJob = createKeeperStateChangeJob(clusterId, keepers, activeKeeperMaster);
 
 		if (!dcMetaCache.isCurrentDcPrimary(clusterId, shardId)) {
 			List<RedisMeta> slaves = dcMetaCache.getShardRedises(clusterId, shardId);
-			logger.info("[keeperActiveElected][current dc backup, set slave to new keeper]{},{}", clusterId, shardId,
+			logger.info("[keeperActiveElected][current dc backup, set slave to new keeper]{},{},{}", clusterId, shardId,
 					slaves);
-			keeperStateChangeJob.setActiveSuccessCommand(new DefaultSlaveOfJob(slaves, activeKeeper.getIp(), activeKeeper.getPort(), clientPool, scheduled));
+			keeperStateChangeJob.setActiveSuccessCommand(new DefaultSlaveOfJob(slaves, activeKeeper.getIp(), activeKeeper.getPort(), clientPool, scheduled, executors));
 		}
 		
 		keyedOneThreadTaskExecutor.execute(new Pair<String, String>(clusterId, shardId), keeperStateChangeJob);
@@ -105,7 +120,8 @@ public class DefaultKeeperStateChangeHandler extends AbstractLifecycle implement
 	@Override
 	protected void doDispose() throws Exception {
 		
-		keyedOneThreadTaskExecutor.destroy();;
+		keyedOneThreadTaskExecutor.destroy();
+		executors.shutdown();
 		super.doDispose();
 	}
 	
@@ -117,11 +133,15 @@ public class DefaultKeeperStateChangeHandler extends AbstractLifecycle implement
 		this.dcMetaCache = dcMetaCache;
 	}
 	
-	public void setClientPool(SimpleKeyedObjectPool<InetSocketAddress, NettyClient> clientPool) {
+	public void setClientPool(SimpleKeyedObjectPool<Endpoint, NettyClient> clientPool) {
 		this.clientPool = clientPool;
 	}
 	
 	public void setScheduled(ScheduledExecutorService scheduled) {
 		this.scheduled = scheduled;
+	}
+
+	public void setExecutors(ExecutorService executors) {
+		this.executors = executors;
 	}
 }

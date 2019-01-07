@@ -1,22 +1,19 @@
 package com.ctrip.xpipe.redis.console.service.meta.impl;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import static org.mockito.Mockito.*;
-
-import java.util.LinkedList;
-import java.util.List;
-
-import com.ctrip.xpipe.redis.console.AbstractConsoleTest;
+import com.ctrip.xpipe.redis.console.AbstractConsoleIntegrationTest;
 import com.ctrip.xpipe.redis.console.migration.status.ClusterStatus;
 import com.ctrip.xpipe.redis.console.model.ClusterTbl;
 import com.ctrip.xpipe.redis.console.model.DcTbl;
 import com.ctrip.xpipe.redis.console.model.MigrationClusterTbl;
 import com.ctrip.xpipe.redis.console.service.migration.MigrationService;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.mockito.Mockito.when;
 
 
 /**
@@ -24,9 +21,9 @@ import com.ctrip.xpipe.redis.console.service.migration.MigrationService;
  *
  * Mar 17, 2017
  */
-@RunWith(MockitoJUnitRunner.class)
-public class ClusterMetaServiceImplTest extends AbstractConsoleTest{
-	
+public class ClusterMetaServiceImplTest extends AbstractConsoleIntegrationTest{
+
+	@Autowired
 	private ClusterMetaServiceImpl  clusterMetaServiceImpl;
 	
 	@Mock
@@ -36,7 +33,8 @@ public class ClusterMetaServiceImplTest extends AbstractConsoleTest{
 	
 	@Before
 	public void beforeClusterMetaServiceImplTest(){
-		clusterMetaServiceImpl = new ClusterMetaServiceImpl();
+		MockitoAnnotations.initMocks(this);
+//		clusterMetaServiceImpl = new ClusterMetaServiceImpl();
 		clusterMetaServiceImpl.setMigrationService(migrationService);
 	}
 	
@@ -56,9 +54,7 @@ public class ClusterMetaServiceImplTest extends AbstractConsoleTest{
 		clusterTbl.setStatus(ClusterStatus.Migrating.toString());
 		
 		
-		List<MigrationClusterTbl> migrationClusters = new LinkedList<>();
-		migrationClusters.add(new MigrationClusterTbl().setDestinationDcId(destinationDcId));
-		when(migrationService.findAllMigrationCluster(clusterId)).thenReturn(migrationClusters);
+		when(migrationService.findLatestUnfinishedMigrationCluster(clusterId)).thenReturn(new MigrationClusterTbl().setDestinationDcId(destinationDcId));
 		
 		dcTbl.setId(destinationDcId);
 		Assert.assertEquals(destinationDcId, clusterMetaServiceImpl.getClusterMetaCurrentPrimaryDc(dcTbl, clusterTbl));
@@ -84,9 +80,7 @@ public class ClusterMetaServiceImplTest extends AbstractConsoleTest{
 		clusterTbl.setActivedcId(currentActiveDcId);
 		
 		
-		List<MigrationClusterTbl> migrationClusters = new LinkedList<>();
-		migrationClusters.add(new MigrationClusterTbl().setDestinationDcId(destinationDcId));
-		when(migrationService.findAllMigrationCluster(clusterId)).thenReturn(migrationClusters);
+		when(migrationService.findLatestUnfinishedMigrationCluster(clusterId)).thenReturn(new MigrationClusterTbl().setDestinationDcId(destinationDcId));
 
 		dcTbl.setId(destinationDcId);
 		for(ClusterStatus clusterStatus : ClusterStatus.values()){

@@ -1,16 +1,15 @@
 package com.ctrip.xpipe.pool;
 
-import java.net.InetSocketAddress;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
 import com.ctrip.xpipe.AbstractTest;
+import com.ctrip.xpipe.api.endpoint.Endpoint;
 import com.ctrip.xpipe.api.pool.SimpleObjectPool;
+import com.ctrip.xpipe.endpoint.DefaultEndPoint;
 import com.ctrip.xpipe.lifecycle.LifecycleHelper;
 import com.ctrip.xpipe.netty.commands.NettyClient;
 import com.ctrip.xpipe.simpleserver.Server;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * @author wenchao.meng
@@ -34,7 +33,7 @@ public class XpipeNettyClientKeyedObjectPoolTest extends AbstractTest {
 		
 	}
 
-	//	@Test
+//		@Test
 	// try xmx32m and run
 	public void testGc() throws Exception {
 
@@ -48,12 +47,36 @@ public class XpipeNettyClientKeyedObjectPoolTest extends AbstractTest {
 			sleep(10);
 		}
 	}
-	
+
+	@Test
+	public void testIdleClose() throws Exception {
+
+		Server  echoServer = startEchoServer();
+		Endpoint key = new DefaultEndPoint("localhost", echoServer.getPort());
+
+		pool.setKeyPooConfig(0, 200, 500, 100);
+
+		SimpleObjectPool<NettyClient> objectPool = pool.getKeyPool(key);
+
+		NettyClient nettyClient1 = objectPool.borrowObject();
+		NettyClient nettyClient2 = objectPool.borrowObject();
+
+		waitConditionUntilTimeOut(()->nettyClient1.channel().isActive()
+				&& nettyClient2.channel().isActive(), 1000);
+		waitConditionUntilTimeOut(() -> echoServer.getConnected() == 2);
+
+		objectPool.returnObject(nettyClient1);
+		objectPool.returnObject(nettyClient2);
+
+		waitConditionUntilTimeOut(() -> echoServer.getConnected() == 0, 60000);
+
+	}
+
 	@Test
 	public void testKeyPoolReuse() throws Exception{
 		
 		Server echoServer = startEchoServer();
-		InetSocketAddress key = new InetSocketAddress("localhost", echoServer.getPort());
+		Endpoint key = new DefaultEndPoint("localhost", echoServer.getPort());
 
 		Assert.assertEquals(0, echoServer.getConnected());
 		
@@ -62,7 +85,7 @@ public class XpipeNettyClientKeyedObjectPoolTest extends AbstractTest {
 		for (int i = 0; i < testCount; i++) {
 			
 			NettyClient client = objectPool.borrowObject();
-			sleep(10);
+			waitConditionUntilTimeOut(()->client.channel().isActive(), 1000);
 			Assert.assertEquals(1, echoServer.getTotalConnected());
 			objectPool.returnObject(client);
 		}
@@ -77,46 +100,45 @@ public class XpipeNettyClientKeyedObjectPoolTest extends AbstractTest {
 
 		for (int i = 0; i < testCount; i++) {
 			
-			InetSocketAddress key = new InetSocketAddress("localhost", echoServer.getPort());
+			Endpoint key = new DefaultEndPoint("localhost", echoServer.getPort());
 			NettyClient client = pool.borrowObject(key);
-			sleep(10);
+			waitConditionUntilTimeOut(()->client.channel().isActive(), 1000);
 			Assert.assertEquals(1, echoServer.getTotalConnected());
 			pool.returnObject(key, client);
 		}
 	}
 	
-	@Test(expected = BorrowObjectException.class)
+//	@Test(expected = BorrowObjectException.class)
 	public void testException() throws BorrowObjectException{
 		
-		pool.borrowObject(new InetSocketAddress("localhost", randomPort()));
+		pool.borrowObject(new DefaultEndPoint("localhost", randomPort()));
 	}
 	
 	@Test
 	public void testDispose() throws Exception{
 
 		Server echoServer = startEchoServer();
-		InetSocketAddress key = new InetSocketAddress("localhost", echoServer.getPort());
+		Endpoint key = new DefaultEndPoint("localhost", echoServer.getPort());
 		
 		Assert.assertEquals(0, echoServer.getConnected());
 		for(int i=0; i < maxPerKey; i++){
 			
 			pool.borrowObject(key);
-			sleep(100);
-			Assert.assertEquals(i + 1, echoServer.getConnected());
+			int finalI = i;
+			waitConditionUntilTimeOut(() -> echoServer.getConnected() == finalI +1);
 		}
 		
 		LifecycleHelper.stopIfPossible(pool);
 		LifecycleHelper.disposeIfPossible(pool);
 		
-		sleep(100);
-		Assert.assertEquals(0, echoServer.getConnected());
+		waitConditionUntilTimeOut(() -> echoServer.getConnected() == 0);
 	}
 	
 	@Test
 	public void testMax() throws Exception{
 		
 		Server echoServer = startEchoServer();
-		InetSocketAddress key = new InetSocketAddress("localhost", echoServer.getPort());
+		Endpoint key = new DefaultEndPoint("localhost", echoServer.getPort());
 		
 		Assert.assertEquals(0, echoServer.getConnected());
 		for(int i=0; i < maxPerKey; i++){
@@ -133,6 +155,30 @@ public class XpipeNettyClientKeyedObjectPoolTest extends AbstractTest {
 			
 		}
 	}
+
+	// testOnBorrow = true, testOnReturn = false
+	@Test
+	public void testReturnWithConnectClose() throws Exception {
+		Server server = startEchoServer();
+		Endpoint key = localhostEndpoint(server.getPort());
+
+		Assert.assertEquals(0, server.getConnected());
+		NettyClient client1 = pool.borrowObject(key);
+
+		Assert.assertEquals(1, pool.getObjectPool(key).getNumActive());
+		waitConditionUntilTimeOut(()->client1.channel().isActive(), 1000);
+		client1.channel().close();
+		pool.returnObject(key, client1);
+		Assert.assertEquals(1, pool.getObjectPool(key).getNumIdle());
+		Assert.assertEquals(0, pool.getObjectPool(key).getNumActive());
+
+		waitConditionUntilTimeOut(()->!client1.channel().isActive(), 1000);
+		Assert.assertEquals(1, pool.getObjectPool(key).getNumIdle());
+		NettyClient client2 = pool.borrowObject(key);
+		Assert.assertNotEquals(client1.channel(), client2.channel());
+	}
+
+	
 	
 	@Override
 	protected void doAfterAbstractTest() throws Exception {

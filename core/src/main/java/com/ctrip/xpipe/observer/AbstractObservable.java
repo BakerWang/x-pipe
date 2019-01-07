@@ -1,15 +1,16 @@
 package com.ctrip.xpipe.observer;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.Executor;
-
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-
 import com.ctrip.xpipe.api.observer.Observable;
 import com.ctrip.xpipe.api.observer.Observer;
 import com.google.common.util.concurrent.MoreExecutors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author wenchao.meng
@@ -19,8 +20,9 @@ import com.google.common.util.concurrent.MoreExecutors;
 public abstract class AbstractObservable implements Observable{
 	
 	protected Logger logger = LoggerFactory.getLogger(getClass());
-	
-	private List<Observer> observers = new LinkedList<>();
+
+	private ReadWriteLock observersLock = new ReentrantReadWriteLock();
+	private List<Observer> observers = new ArrayList<>();
 		
 	private Executor executors = MoreExecutors.directExecutor();
 
@@ -31,18 +33,28 @@ public abstract class AbstractObservable implements Observable{
 		this.executors = executors;
 	}
 
+	public void setExecutors(Executor executors) {
+		this.executors = executors;
+	}
+
 	@Override
 	public void addObserver(Observer observer) {
-		
-		synchronized (observers) {
+
+		try {
+			observersLock.writeLock().lock();
 			observers.add(observer);
+		}finally {
+			observersLock.writeLock().unlock();
 		}
 	}
 
 	public void removeObserver(Observer observer) {
-		
-		synchronized (observers) {
+
+		try {
+			observersLock.writeLock().lock();
 			observers.remove(observer);
+		}finally {
+			observersLock.writeLock().unlock();
 		}
 	}
 	
@@ -50,9 +62,12 @@ public abstract class AbstractObservable implements Observable{
 	protected void notifyObservers(final Object arg){
 		
 		Object []tmpObservers;
-		
-		synchronized (observers) {
+
+		try {
+			observersLock.readLock().lock();
 			tmpObservers = observers.toArray();
+		}finally {
+			observersLock.readLock().unlock();
 		}
 		
 		for(final Object observer : tmpObservers){

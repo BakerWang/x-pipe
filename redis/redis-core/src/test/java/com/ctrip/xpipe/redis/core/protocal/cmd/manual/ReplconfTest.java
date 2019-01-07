@@ -1,21 +1,20 @@
 package com.ctrip.xpipe.redis.core.protocal.cmd.manual;
 
-import java.net.InetSocketAddress;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
 import com.ctrip.xpipe.api.command.CommandFuture;
 import com.ctrip.xpipe.api.command.CommandFutureListener;
+import com.ctrip.xpipe.endpoint.DefaultEndPoint;
 import com.ctrip.xpipe.netty.commands.NettyClient;
 import com.ctrip.xpipe.pool.FixedObjectPool;
 import com.ctrip.xpipe.redis.core.protocal.Psync;
 import com.ctrip.xpipe.redis.core.protocal.cmd.InMemoryPsync;
 import com.ctrip.xpipe.redis.core.protocal.cmd.Replconf;
 import com.ctrip.xpipe.redis.core.protocal.cmd.Replconf.ReplConfType;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author wenchao.meng
@@ -36,7 +35,7 @@ public class ReplconfTest extends AbstractCommandTest {
 	@Test
 	public void testCapa() throws Exception{
 		
-		Replconf conf = new Replconf(getXpipeNettyClientKeyedObjectPool().getKeyPool(new InetSocketAddress(host, port)), ReplConfType.CAPA, scheduled, "eof", "psync2");
+		Replconf conf = new Replconf(getXpipeNettyClientKeyedObjectPool().getKeyPool(new DefaultEndPoint(host, port)), ReplConfType.CAPA, scheduled, "eof", "psync2");
 		logger.info("{}", conf.execute().get());		
 	}
 

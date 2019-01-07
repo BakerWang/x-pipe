@@ -1,10 +1,9 @@
 package com.ctrip.xpipe.utils;
 
-import org.junit.Assert;
-import org.junit.Test;
-
 import com.ctrip.xpipe.AbstractTest;
 import com.ctrip.xpipe.simpleserver.Server;
+import org.junit.Assert;
+import org.junit.Test;
 
 
 /**
@@ -19,11 +18,11 @@ public class TcpPortCheckTest extends AbstractTest{
 		
 		int port = randomPort();
 		
-		Assert.assertFalse(new TcpPortCheck("localhost", port).checkOpen());;
+		Assert.assertFalse(new TcpPortCheck("localhost", port).checkOpen());
 		
 		Server server = startEchoServer(port);
 		
-		Assert.assertTrue(new TcpPortCheck("localhost", port).checkOpen());;
+		Assert.assertTrue(new TcpPortCheck("localhost", port).checkOpen());
 		sleep(100);
 		Assert.assertEquals(0, server.getConnected());
 		

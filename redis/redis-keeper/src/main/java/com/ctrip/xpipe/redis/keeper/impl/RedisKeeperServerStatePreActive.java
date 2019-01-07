@@ -1,14 +1,14 @@
 package com.ctrip.xpipe.redis.keeper.impl;
 
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-
+import com.ctrip.xpipe.api.endpoint.Endpoint;
 import com.ctrip.xpipe.redis.core.meta.KeeperState;
 import com.ctrip.xpipe.redis.core.protocal.error.NoMasterlinkRedisError;
 import com.ctrip.xpipe.redis.keeper.RedisClient;
 import com.ctrip.xpipe.redis.keeper.RedisKeeperServer;
 import com.ctrip.xpipe.redis.keeper.RedisKeeperServer.PROMOTION_STATE;
+
+import java.io.IOException;
 
 /**
  * @author wenchao.meng
@@ -23,14 +23,14 @@ public class RedisKeeperServerStatePreActive extends AbstractRedisKeeperServerSt
 	}
 
 	@Override
-	public void becomeActive(InetSocketAddress masterAddress) {
+	public void becomeActive(Endpoint masterAddress) {
 		
 		logger.info("[becomeActive]{}", masterAddress);
 		doBecomeActive(masterAddress);
 	}
 
 	@Override
-	public void becomeBackup(InetSocketAddress masterAddress){
+	public void becomeBackup(Endpoint masterAddress){
 		
 		logger.info("[becomeBackup]{}", masterAddress);
 		doBecomeBackup(masterAddress);

@@ -1,17 +1,16 @@
 package com.ctrip.xpipe.redis.meta.server.job;
 
-import java.net.InetSocketAddress;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.junit.Test;
-import org.unidal.tuple.Pair;
-
+import com.ctrip.xpipe.api.endpoint.Endpoint;
 import com.ctrip.xpipe.api.pool.SimpleKeyedObjectPool;
 import com.ctrip.xpipe.netty.commands.NettyClient;
 import com.ctrip.xpipe.redis.core.entity.RedisMeta;
 import com.ctrip.xpipe.redis.meta.server.AbstractMetaServerTest;
+import com.ctrip.xpipe.tuple.Pair;
 import com.ctrip.xpipe.utils.IpUtils;
+import org.junit.Test;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author wenchao.meng
@@ -25,11 +24,11 @@ public class SlaveofJobTest extends AbstractMetaServerTest {
 	@Test
 	public void test() throws Exception {
 
-		SimpleKeyedObjectPool<InetSocketAddress, NettyClient> clientPool = getXpipeNettyClientKeyedObjectPool();
+		SimpleKeyedObjectPool<Endpoint, NettyClient> clientPool = getXpipeNettyClientKeyedObjectPool();
 
 		List<RedisMeta> slaves = getRedisSlaves(redises);
 
-		SlaveofJob slaveofJob = new SlaveofJob(slaves, "10.2.58.242", 6379, clientPool, scheduled);
+		SlaveofJob slaveofJob = new SlaveofJob(slaves, "10.2.58.242", 6379, clientPool, scheduled, executors);
 		slaveofJob.execute().get();
 
 	}

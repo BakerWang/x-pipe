@@ -1,25 +1,22 @@
 package com.ctrip.xpipe.utils;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.ServiceLoader;
-import java.util.concurrent.ConcurrentHashMap;
-
-import com.ctrip.xpipe.api.migration.DcMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ctrip.xpipe.api.config.Config;
+import com.ctrip.xpipe.api.email.EmailService;
 import com.ctrip.xpipe.api.foundation.FoundationService;
 import com.ctrip.xpipe.api.lifecycle.Ordered;
-import com.ctrip.xpipe.api.migration.MigrationPublishService;
+import com.ctrip.xpipe.api.migration.DcMapper;
+import com.ctrip.xpipe.api.migration.OuterClientService;
+import com.ctrip.xpipe.api.organization.Organization;
 import com.ctrip.xpipe.api.sso.LogoutHandler;
 import com.ctrip.xpipe.api.sso.UserInfo;
 import com.ctrip.xpipe.api.sso.UserInfoHolder;
 import com.ctrip.xpipe.lifecycle.OrderedComparator;
 import com.ctrip.xpipe.metric.MetricProxy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author wenchao.meng
@@ -58,12 +55,18 @@ public class ServicesUtil {
 		return load(MetricProxy.class);
 	}
 	
-	public static MigrationPublishService getMigrationPublishService() {
-		return load(MigrationPublishService.class);
+	public static OuterClientService getOuterClientService() {
+		return load(OuterClientService.class);
 	}
 
 	public static DcMapper getDcMapperService() {
 		return load(DcMapper.class);
+	}
+
+	public static Organization getOrganizationService() {return load(Organization.class);}
+
+	public static EmailService getEmailService() {
+		return load(EmailService.class);
 	}
 
 	@SuppressWarnings("unchecked")

@@ -9,6 +9,8 @@ import com.ctrip.xpipe.redis.core.config.CoreConfig;
  */
 public interface KeeperConfig extends CoreConfig{
 
+	public static final long DEFAULT_TRAFFIC_REPORT_INTERVAL_MILLIS = 5000L;
+
 	int getMetaServerConnectTimeout();
 
 	int getMetaServerReadTimeout();
@@ -28,6 +30,8 @@ public interface KeeperConfig extends CoreConfig{
 	long getReplicationStoreMaxCommandsToTransferBeforeCreateRdb();
 
 	int getReplicationStoreMinTimeMilliToGcAfterCreate();
+
+	long getCommandReaderFlyingThreshold();
 
 	int getRdbDumpMinIntervalMilli();
 	

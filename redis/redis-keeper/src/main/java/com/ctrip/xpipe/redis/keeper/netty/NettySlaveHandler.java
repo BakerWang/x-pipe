@@ -3,14 +3,15 @@ package com.ctrip.xpipe.redis.keeper.netty;
 import com.ctrip.xpipe.api.monitor.EventMonitor;
 import com.ctrip.xpipe.exception.XpipeException;
 import com.ctrip.xpipe.netty.ByteBufReadAction;
+import com.ctrip.xpipe.netty.ByteBufReadActionException;
 import com.ctrip.xpipe.netty.ChannelTrafficStatisticsHandler;
 import com.ctrip.xpipe.redis.keeper.RedisKeeperServer;
 import com.ctrip.xpipe.redis.keeper.RedisMasterReplication;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
+import io.netty.channel.FileRegion;
 
 /**
  * @author wenchao.meng
@@ -52,12 +53,16 @@ public class NettySlaveHandler extends ChannelTrafficStatisticsHandler{
 	
 	@Override
 	protected void doChannelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-		
 		ByteBuf byteBuf = (ByteBuf) msg;
+		redisKeeperServer.getKeeperMonitor().getKeeperStats().increaseInputBytes(byteBuf.readableBytes());
 		byteBufReadPolicy.read(ctx.channel(), byteBuf, new ByteBufReadAction() {
 			@Override
-			public void read(Channel channel, ByteBuf byteBuf) throws XpipeException {
-				redisMasterReplication.handleResponse(channel, byteBuf);
+			public void read(Channel channel, ByteBuf byteBuf) throws ByteBufReadActionException {
+				try {
+					redisMasterReplication.handleResponse(channel, byteBuf);
+				} catch (XpipeException e) {
+					throw new ByteBufReadActionException("handle:" + channel ,e);
+				}
 			}
 		});
 	}
@@ -73,6 +78,12 @@ public class NettySlaveHandler extends ChannelTrafficStatisticsHandler{
 
 	@Override
     protected void doWrite(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-        
+		long writtenBytes = 0L;
+		if (msg instanceof ByteBuf) {
+			writtenBytes = ((ByteBuf) msg).readableBytes();
+		} else if (msg instanceof FileRegion) {
+			writtenBytes = (((FileRegion) msg).count());
+		}
+		redisKeeperServer.getKeeperMonitor().getKeeperStats().increaseOutputBytes(writtenBytes);
     }
 }

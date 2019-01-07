@@ -1,24 +1,23 @@
 package com.ctrip.xpipe.command;
 
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ctrip.xpipe.api.command.Command;
 import com.ctrip.xpipe.api.command.CommandFuture;
 import com.ctrip.xpipe.api.command.CommandFutureListener;
 import com.ctrip.xpipe.api.retry.RetryPolicy;
 import com.ctrip.xpipe.retry.NoWaitRetry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author wenchao.meng
  *
  * Jul 14, 2016
  */
-public class CommandRetryWrapper<V> extends AbstractCommand<V>{
+public final class CommandRetryWrapper<V> extends AbstractCommand<V>{
 	
 	protected Logger logger = LoggerFactory.getLogger(CommandRetryWrapper.class);
 	
@@ -37,7 +36,7 @@ public class CommandRetryWrapper<V> extends AbstractCommand<V>{
 		this(scheduled, 0, 0, new NoWaitRetry(), command);
 	}
 
-	private CommandRetryWrapper(ScheduledExecutorService scheduled, int retryTimes, int retryTimeoutMilli, RetryPolicy retryPolicy, Command<V> command) {
+	public CommandRetryWrapper(ScheduledExecutorService scheduled, int retryTimes, int retryTimeoutMilli, RetryPolicy retryPolicy, Command<V> command) {
 		
 		this.scheduled = scheduled;
 		this.retryTimes = retryTimes;
@@ -89,10 +88,10 @@ public class CommandRetryWrapper<V> extends AbstractCommand<V>{
 						return;
 					}
 
-					logger.error("[operationComplete]" + command, future().cause());
+					logger.error("[operationComplete]" + command, commandFuture.cause());
 					
 					int waitMilli = retryPolicy.retryWaitMilli();
-					logger.info("[retry]{}, {},{}", executeCount.get(), waitMilli, command);
+					logger.info("[retry]{},{},{}", executeCount.get(), waitMilli, command);
 					command.reset();
 					execute(waitMilli, TimeUnit.MILLISECONDS);
 				}
@@ -116,7 +115,11 @@ public class CommandRetryWrapper<V> extends AbstractCommand<V>{
 			logger.info("[shouldRetry][false][retry timeout]{} > {}", current, timeoutTime);
 			return false;
 		}
-		
+
+		if(retryPolicy == null){
+			return false;
+		}
+
 		if(!retryPolicy.retry(throwable)){
 			logger.info("[shouldRetry][exception not retry]{}, {}", retryPolicy, throwable.getClass());
 			return false;

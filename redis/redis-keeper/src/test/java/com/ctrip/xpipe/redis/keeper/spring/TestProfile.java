@@ -1,20 +1,24 @@
 package com.ctrip.xpipe.redis.keeper.spring;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-
 import com.ctrip.xpipe.AbstractTest;
-import com.ctrip.xpipe.redis.keeper.config.KeeperConfig;
-import com.ctrip.xpipe.redis.keeper.config.KeeperContainerConfig;
-import com.ctrip.xpipe.redis.keeper.config.TestKeeperConfig;
-import com.ctrip.xpipe.redis.keeper.config.TestKeeperContainerConfig;
+import com.ctrip.xpipe.redis.core.proxy.ProxyResourceManager;
+import com.ctrip.xpipe.redis.core.proxy.endpoint.DefaultProxyEndpointManager;
+import com.ctrip.xpipe.redis.core.proxy.endpoint.NaiveNextHopAlgorithm;
+import com.ctrip.xpipe.redis.core.proxy.endpoint.NextHopAlgorithm;
+import com.ctrip.xpipe.redis.core.proxy.endpoint.ProxyEndpointManager;
+import com.ctrip.xpipe.redis.core.proxy.handler.NettyClientSslHandlerFactory;
+import com.ctrip.xpipe.redis.core.proxy.handler.NettySslHandlerFactory;
+import com.ctrip.xpipe.redis.core.proxy.resource.KeeperProxyResourceManager;
+import com.ctrip.xpipe.redis.keeper.config.*;
 import com.ctrip.xpipe.redis.keeper.monitor.KeepersMonitorManager;
 import com.ctrip.xpipe.redis.keeper.monitor.impl.NoneKeepersMonitorManager;
 import com.ctrip.xpipe.spring.AbstractProfile;
 import com.ctrip.xpipe.zk.ZkClient;
 import com.ctrip.xpipe.zk.ZkTestServer;
 import com.ctrip.xpipe.zk.impl.TestZkClient;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 /**
  * @author wenchao.meng
@@ -59,6 +63,18 @@ public class TestProfile extends AbstractProfile{
 	@Bean
 	public KeepersMonitorManager getKeeperMonitorManager(){
 		return new NoneKeepersMonitorManager();
+	}
+
+	@Bean
+	public NettySslHandlerFactory getClientSslFactory() {
+		return new NettyClientSslHandlerFactory(new DefaultTlsConfig());
+	}
+
+	@Bean
+	public ProxyResourceManager getProxyResourceManager() {
+		ProxyEndpointManager endpointManager = new DefaultProxyEndpointManager(()->60);
+		NextHopAlgorithm algorithm = new NaiveNextHopAlgorithm();
+		return new KeeperProxyResourceManager(endpointManager, algorithm);
 	}
 	
 }

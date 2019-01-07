@@ -1,31 +1,16 @@
 package com.ctrip.xpipe.redis.keeper;
 
+import com.ctrip.xpipe.redis.keeper.config.DefaultKeeperConfigTest;
+import com.ctrip.xpipe.redis.keeper.container.KeeperContainerServiceTest;
+import com.ctrip.xpipe.redis.keeper.handler.*;
+import com.ctrip.xpipe.redis.keeper.impl.*;
+import com.ctrip.xpipe.redis.keeper.impl.fakeredis.*;
+import com.ctrip.xpipe.redis.keeper.monitor.impl.DefaultKeeperStatsTest;
+import com.ctrip.xpipe.redis.keeper.protocal.cmd.PsyncTest;
+import com.ctrip.xpipe.redis.keeper.store.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-
-import com.ctrip.xpipe.redis.keeper.impl.DefaultRedisClientTest;
-import com.ctrip.xpipe.redis.keeper.impl.DefaultRedisKeeperServerTest;
-import com.ctrip.xpipe.redis.keeper.impl.DefaultRedisSlaveTest;
-import com.ctrip.xpipe.redis.keeper.impl.RedisKeeperServerStateActiveTest;
-import com.ctrip.xpipe.redis.keeper.impl.RedisKeeperServerStateBackupTest;
-import com.ctrip.xpipe.redis.keeper.impl.RedisKeeperServerStateUnknownTest;
-import com.ctrip.xpipe.redis.keeper.impl.fakeredis.DefaultRedisKeeperServerConnectToFakeRedisTest;
-import com.ctrip.xpipe.redis.keeper.impl.fakeredis.FakeRedisExceptionTest;
-import com.ctrip.xpipe.redis.keeper.impl.fakeredis.FakeRedisHalfRdbServerFail;
-import com.ctrip.xpipe.redis.keeper.impl.fakeredis.FakeRedisRdbDumpLong;
-import com.ctrip.xpipe.redis.keeper.impl.fakeredis.FakeRedisRdbDumperTest;
-import com.ctrip.xpipe.redis.keeper.protocal.cmd.PsyncTest;
-import com.ctrip.xpipe.redis.keeper.store.DefaultCommandStoreTest;
-import com.ctrip.xpipe.redis.keeper.store.DefaultRdbStoreEofMarkTest;
-import com.ctrip.xpipe.redis.keeper.store.DefaultRdbStoreTest;
-import com.ctrip.xpipe.redis.keeper.store.DefaultReplicationStoreManagerTest;
-import com.ctrip.xpipe.redis.keeper.store.DefaultReplicationStoreTest;
-import com.ctrip.xpipe.redis.keeper.config.DefaultKeeperConfigTest;
-import com.ctrip.xpipe.redis.keeper.container.KeeperContainerServiceTest;
-import com.ctrip.xpipe.redis.keeper.handler.CommandHandlerManagerTest;
-import com.ctrip.xpipe.redis.keeper.handler.PsyncHandlerTest;
-import com.ctrip.xpipe.redis.keeper.handler.RoleCommandHandlerTest;
 
 /**
  * @author wenchao.meng
@@ -42,6 +27,7 @@ import com.ctrip.xpipe.redis.keeper.handler.RoleCommandHandlerTest;
 	RedisKeeperServerStateBackupTest.class,
 	RedisKeeperServerStateActiveTest.class,
 	RedisKeeperServerStateUnknownTest.class,
+	DefaultRedisMasterReplicationTest.class,
 	KeeperContainerServiceTest.class,
 	DefaultReplicationStoreManagerTest.class,
 	DefaultRedisKeeperServerTest.class,
@@ -55,7 +41,11 @@ import com.ctrip.xpipe.redis.keeper.handler.RoleCommandHandlerTest;
 	FakeRedisExceptionTest.class, 
 	FakeRedisRdbDumperTest.class,
 	FakeRedisRdbDumpLong.class,
-	PsyncHandlerTest.class
+	PsyncHandlerTest.class,
+	SlaveOfCommandHandlerTest.class,
+	KeeperCommandHandlerTest.class,
+	InfoHandlerTest.class,
+	DefaultKeeperStatsTest.class
 })
 public class AllTests {
 

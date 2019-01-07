@@ -1,14 +1,12 @@
 package com.ctrip.xpipe.redis.meta.server.dchange.impl;
 
-import java.net.InetSocketAddress;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
+import com.ctrip.xpipe.endpoint.DefaultEndPoint;
 import com.ctrip.xpipe.redis.core.protocal.cmd.ConfigGetCommand.ConfigGetMinSlavesToWrite;
 import com.ctrip.xpipe.redis.meta.server.AbstractMetaServerTest;
 import com.ctrip.xpipe.redis.meta.server.dcchange.impl.MinSlavesRedisReadOnly;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * 
@@ -34,11 +32,11 @@ public class MinSlavesRedisReadOnlyTest extends AbstractMetaServerTest{
 	public void testMark() throws Exception{
 		
 		minSlavesRedisReadOnly.makeReadOnly();
-		int number = new ConfigGetMinSlavesToWrite(getXpipeNettyClientKeyedObjectPool().getKeyPool(new InetSocketAddress(host, port)), scheduled).execute().get();
+		int number = new ConfigGetMinSlavesToWrite(getXpipeNettyClientKeyedObjectPool().getKeyPool(new DefaultEndPoint(host, port)), scheduled).execute().get();
 		Assert.assertEquals(MinSlavesRedisReadOnly.READ_ONLY_NUMBER, number);
 		
 		minSlavesRedisReadOnly.makeWritable();
-		number = new ConfigGetMinSlavesToWrite(getXpipeNettyClientKeyedObjectPool().getKeyPool(new InetSocketAddress(host, port)), scheduled).execute().get();
+		number = new ConfigGetMinSlavesToWrite(getXpipeNettyClientKeyedObjectPool().getKeyPool(new DefaultEndPoint(host, port)), scheduled).execute().get();
 		Assert.assertEquals(MinSlavesRedisReadOnly.WRITABLE_NUMBER, number);
 	}
 

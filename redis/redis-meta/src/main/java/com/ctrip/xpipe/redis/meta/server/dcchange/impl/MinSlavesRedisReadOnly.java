@@ -1,16 +1,16 @@
 package com.ctrip.xpipe.redis.meta.server.dcchange.impl;
 
-import java.net.InetSocketAddress;
-import java.util.concurrent.ScheduledExecutorService;
-
 import com.ctrip.xpipe.api.command.Command;
 import com.ctrip.xpipe.api.pool.SimpleObjectPool;
+import com.ctrip.xpipe.endpoint.DefaultEndPoint;
 import com.ctrip.xpipe.netty.commands.NettyClient;
 import com.ctrip.xpipe.pool.XpipeNettyClientKeyedObjectPool;
 import com.ctrip.xpipe.redis.core.protocal.cmd.ConfigRewrite;
 import com.ctrip.xpipe.redis.core.protocal.cmd.ConfigSetCommand.ConfigSetMinSlavesToWrite;
 import com.ctrip.xpipe.redis.core.protocal.cmd.transaction.TransactionalCommand;
 import com.ctrip.xpipe.redis.meta.server.dcchange.RedisReadonly;
+
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * @author wenchao.meng
@@ -41,7 +41,7 @@ public class MinSlavesRedisReadOnly extends AbstractRedisReadOnly implements Red
 
 	private Command<?> createTransactionalCommand(int number){
 		
-		SimpleObjectPool<NettyClient> clientPool = keyedObjectPool.getKeyPool(new InetSocketAddress(ip, port));
+		SimpleObjectPool<NettyClient> clientPool = keyedObjectPool.getKeyPool(new DefaultEndPoint(ip, port));
 		ConfigSetMinSlavesToWrite configSetMinSlavesToWrite = new ConfigSetMinSlavesToWrite(null, number, scheduled);
 		
 		return new TransactionalCommand(clientPool, scheduled, configSetMinSlavesToWrite, new ConfigRewrite(null, scheduled));

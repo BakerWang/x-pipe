@@ -1,12 +1,11 @@
 package com.ctrip.xpipe.redis.core.protocal.cmd;
 
-import java.util.concurrent.ScheduledExecutorService;
-
 import com.ctrip.xpipe.api.pool.SimpleObjectPool;
 import com.ctrip.xpipe.netty.commands.NettyClient;
 import com.ctrip.xpipe.redis.core.protocal.protocal.RequestStringParser;
-
 import io.netty.buffer.ByteBuf;
+
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * @author wenchao.meng
@@ -22,7 +21,11 @@ public class PingCommand extends AbstractRedisCommand<String>{
 	public static final String PONG = "PONG";
 
 	public PingCommand(SimpleObjectPool<NettyClient> clientPool, ScheduledExecutorService scheduled) {
-		super(clientPool, scheduled);
+		this(clientPool, scheduled, DEFAULT_PINT_TIME_OUT_MILLI);
+	}
+
+	public PingCommand(SimpleObjectPool<NettyClient> clientPool, ScheduledExecutorService scheduled, int commandTimeoutMilli) {
+		super(clientPool, scheduled, commandTimeoutMilli);
 	}
 
 	@Override
@@ -37,13 +40,7 @@ public class PingCommand extends AbstractRedisCommand<String>{
 
 	@Override
 	public ByteBuf getRequest() {
-		
 		return new RequestStringParser(PING).format();
-	}
-	
-	@Override
-	public int getCommandTimeoutMilli() {
-		return DEFAULT_PINT_TIME_OUT_MILLI;
 	}
 
 }

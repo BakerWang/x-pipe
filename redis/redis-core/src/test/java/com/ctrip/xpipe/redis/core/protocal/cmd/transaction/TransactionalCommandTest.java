@@ -1,19 +1,16 @@
 package com.ctrip.xpipe.redis.core.protocal.cmd.transaction;
 
-import java.net.InetSocketAddress;
-
-import org.junit.Assert;
-import org.junit.Test;
-
 import com.ctrip.xpipe.api.pool.SimpleObjectPool;
+import com.ctrip.xpipe.endpoint.DefaultEndPoint;
 import com.ctrip.xpipe.netty.commands.NettyClient;
 import com.ctrip.xpipe.redis.core.AbstractRedisTest;
 import com.ctrip.xpipe.redis.core.protocal.cmd.AbstractRedisCommand;
 import com.ctrip.xpipe.redis.core.protocal.cmd.RoleCommand;
 import com.ctrip.xpipe.redis.core.protocal.cmd.SlaveOfCommand;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  * manual test with redis
@@ -44,7 +41,7 @@ public class TransactionalCommandTest extends AbstractRedisTest {
 	private TransactionalCommand createRightTransaction() throws Exception {
 
 		return new TransactionalCommand(
-				getXpipeNettyClientKeyedObjectPool().getKeyPool(new InetSocketAddress(ip, port)), scheduled,
+				getXpipeNettyClientKeyedObjectPool().getKeyPool(new DefaultEndPoint(ip, port)), scheduled,
 				new SlaveOfCommand(null, scheduled), new RoleCommand(null, scheduled));
 	}
 
@@ -71,7 +68,7 @@ public class TransactionalCommandTest extends AbstractRedisTest {
 	private TransactionalCommand createWrongTransaction() throws Exception {
 
 		return new TransactionalCommand(
-				getXpipeNettyClientKeyedObjectPool().getKeyPool(new InetSocketAddress(ip, port)), scheduled,
+				getXpipeNettyClientKeyedObjectPool().getKeyPool(new DefaultEndPoint(ip, port)), scheduled,
 				new SlaveOfCommand(null, scheduled), new WrongCommand(null));
 	}
 

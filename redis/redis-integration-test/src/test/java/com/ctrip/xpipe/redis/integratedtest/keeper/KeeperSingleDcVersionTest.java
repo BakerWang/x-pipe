@@ -1,19 +1,18 @@
 package com.ctrip.xpipe.redis.integratedtest.keeper;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-
-import org.junit.Test;
-
 import com.ctrip.xpipe.api.pool.SimpleObjectPool;
+import com.ctrip.xpipe.endpoint.DefaultEndPoint;
 import com.ctrip.xpipe.netty.commands.NettyClient;
 import com.ctrip.xpipe.redis.core.entity.RedisMeta;
 import com.ctrip.xpipe.redis.core.meta.KeeperState;
 import com.ctrip.xpipe.redis.core.protocal.cmd.ConfigGetCommand.ConfigGetDisklessSync;
 import com.ctrip.xpipe.redis.core.protocal.cmd.ConfigGetCommand.ConfigGetDisklessSyncDelay;
 import com.ctrip.xpipe.utils.IpUtils;
-
+import org.junit.Test;
 import redis.clients.jedis.Jedis;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
 
 /**
  * @author wenchao.meng
@@ -66,7 +65,7 @@ public class KeeperSingleDcVersionTest extends AbstractKeeperIntegratedSingleDc{
 			throw new IllegalStateException("redis(" + redisAddr +") version not right, expected:" + version);
 		}
 		
-		SimpleObjectPool<NettyClient>  clientPool = getXpipeNettyClientKeyedObjectPool().getKeyPool(redisAddr);
+		SimpleObjectPool<NettyClient>  clientPool = getXpipeNettyClientKeyedObjectPool().getKeyPool(new DefaultEndPoint(redisAddr));
 		Boolean diskLess = new ConfigGetDisklessSync(clientPool, scheduled).execute().get();
 		if(diskLess){
 			int diskLessSyncDelay = new ConfigGetDisklessSyncDelay(clientPool, scheduled).execute().get();

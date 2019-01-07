@@ -1,5 +1,7 @@
 package com.ctrip.xpipe.lifecycle;
 
+import com.ctrip.xpipe.AbstractTest;
+import com.ctrip.xpipe.api.lifecycle.Lifecycle;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -7,9 +9,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import com.ctrip.xpipe.AbstractTest;
-import com.ctrip.xpipe.api.lifecycle.Lifecycle;
 
 
 /**
@@ -48,7 +47,7 @@ public class DefaultRegistryTest extends AbstractTest{
 		defaultRegistry.stop();
 		defaultRegistry.dispose();
 		defaultRegistry.destroy();
-		Assert.assertTrue(lifecycle1.getLifecycleState().isDisposed());;
+		Assert.assertTrue(lifecycle1.getLifecycleState().isDisposed());
 		Assert.assertFalse(applicationContext.isActive());
 	}
 	
@@ -56,7 +55,7 @@ public class DefaultRegistryTest extends AbstractTest{
 	public void testDestroy() throws Exception{
 
 		defaultRegistry.destroy();
-		Assert.assertTrue(lifecycle1.getLifecycleState().isDisposed());;
+		Assert.assertTrue(lifecycle1.getLifecycleState().isDisposed());
 		Assert.assertFalse(applicationContext.isActive());
 	}
 

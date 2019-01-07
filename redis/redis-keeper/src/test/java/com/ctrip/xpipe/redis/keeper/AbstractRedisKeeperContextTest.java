@@ -1,24 +1,19 @@
 package com.ctrip.xpipe.redis.keeper;
 
-import java.io.File;
-import java.io.IOException;
-
+import com.ctrip.xpipe.api.cluster.LeaderElectorManager;
+import com.ctrip.xpipe.redis.core.entity.*;
+import com.ctrip.xpipe.redis.core.metaserver.MetaServerKeeperService;
+import com.ctrip.xpipe.redis.core.proxy.ProxyResourceManager;
+import com.ctrip.xpipe.redis.keeper.config.KeeperConfig;
+import com.ctrip.xpipe.redis.keeper.impl.DefaultRedisKeeperServer;
+import com.ctrip.xpipe.redis.keeper.spring.KeeperContextConfig;
 import org.junit.Before;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.xml.sax.SAXException;
 
-import com.ctrip.xpipe.api.cluster.LeaderElectorManager;
-import com.ctrip.xpipe.redis.core.entity.ClusterMeta;
-import com.ctrip.xpipe.redis.core.entity.DcMeta;
-import com.ctrip.xpipe.redis.core.entity.KeeperMeta;
-import com.ctrip.xpipe.redis.core.entity.RedisMeta;
-import com.ctrip.xpipe.redis.core.entity.ShardMeta;
-import com.ctrip.xpipe.redis.core.entity.XpipeMeta;
-import com.ctrip.xpipe.redis.core.metaserver.MetaServerKeeperService;
-import com.ctrip.xpipe.redis.keeper.config.KeeperConfig;
-import com.ctrip.xpipe.redis.keeper.impl.DefaultRedisKeeperServer;
-import com.ctrip.xpipe.redis.keeper.spring.KeeperContextConfig;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * @author wenchao.meng
@@ -30,6 +25,8 @@ public class AbstractRedisKeeperContextTest extends AbstractRedisKeeperTest {
 	protected MetaServerKeeperService  metaService;
 	
 	protected KeeperConfig  keeperConfig;
+
+	private ProxyResourceManager proxyResourceManager;
 	
 	private String keeperConfigFile = "keeper6666.xml";
 
@@ -42,6 +39,7 @@ public class AbstractRedisKeeperContextTest extends AbstractRedisKeeperTest {
 		
 		metaService = getRegistry().getComponent(MetaServerKeeperService.class);
 		keeperConfig = getRegistry().getComponent(KeeperConfig.class);
+		proxyResourceManager = getRegistry().getComponent(ProxyResourceManager.class);
 		
 	}
 	
@@ -117,7 +115,8 @@ public class AbstractRedisKeeperContextTest extends AbstractRedisKeeperTest {
 
 	protected RedisKeeperServer createRedisKeeperServer(KeeperMeta keeper, KeeperConfig keeperConfig,
 			MetaServerKeeperService metaService, File baseDir, LeaderElectorManager leaderElectorManager) {
-		return new DefaultRedisKeeperServer(keeper, keeperConfig, baseDir, metaService, leaderElectorManager, createkeepersMonitorManager());
+		return new DefaultRedisKeeperServer(keeper, keeperConfig, baseDir, metaService, leaderElectorManager,
+				createkeepersMonitorManager(), proxyResourceManager);
 	}
 
 	protected RedisMeta createRedisMeta() {

@@ -1,9 +1,9 @@
 package com.ctrip.xpipe.redis.keeper.impl;
 
 
-import java.util.Date;
-
 import com.ctrip.xpipe.redis.keeper.RdbDumper;
+
+import java.util.Date;
 
 /**
  * @author wenchao.meng
@@ -15,7 +15,7 @@ public class SetRdbDumperException extends AbstractRdbDumperException{
 	private static final long serialVersionUID = 1L;
 
 	public SetRdbDumperException(RdbDumper oldDumper) {
-		super(String.format("already exist, old dumper:%s", oldDumper), false);
+		super(String.format("already exist, old dumper:%s", oldDumper), true);
 	}
 
 	public SetRdbDumperException(long lastTime, long minInterval) {

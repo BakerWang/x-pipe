@@ -1,7 +1,5 @@
 package com.ctrip.xpipe.redis.keeper.impl;
 
-import java.io.IOException;
-
 import com.ctrip.xpipe.command.AbstractCommand;
 import com.ctrip.xpipe.redis.core.store.FullSyncListener;
 import com.ctrip.xpipe.redis.core.store.RdbDumpState;
@@ -10,6 +8,8 @@ import com.ctrip.xpipe.redis.keeper.RedisKeeperServer;
 import com.ctrip.xpipe.redis.keeper.RedisSlave;
 import com.ctrip.xpipe.redis.keeper.SLAVE_STATE;
 import com.ctrip.xpipe.redis.keeper.store.DefaultFullSyncListener;
+
+import java.io.IOException;
 
 /**
  * @author wenchao.meng
@@ -36,21 +36,20 @@ public abstract class AbstractRdbDumper extends AbstractCommand<Void> implements
 		this.rdbDumpState = rdbDumpState;
 
 		switch (rdbDumpState) {
-		case DUMPING:
-			doWhenDumping();
-			break;
-		case FAIL:
-			doWhenDumpFailed();
-			redisKeeperServer.clearRdbDumper(this);
-			;
-			break;
-		case NORMAL:
-			// clear dumper
-			redisKeeperServer.clearRdbDumper(this);
-			;
-			break;
-		case WAIT_DUMPPING:
-			break;
+			case DUMPING:
+				doWhenDumping();
+				break;
+			case FAIL:
+				doWhenDumpFailed();
+				redisKeeperServer.clearRdbDumper(this);
+				break;
+			case NORMAL:
+				// clear dumper
+				redisKeeperServer.clearRdbDumper(this);
+				;
+				break;
+			case WAIT_DUMPPING:
+				break;
 		}
 	}
 
