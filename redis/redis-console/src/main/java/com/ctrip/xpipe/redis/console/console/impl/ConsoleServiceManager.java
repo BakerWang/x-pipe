@@ -4,6 +4,8 @@ import com.ctrip.xpipe.redis.console.config.ConsoleConfig;
 import com.ctrip.xpipe.redis.console.console.ConsoleService;
 import com.ctrip.xpipe.redis.console.healthcheck.actions.interaction.HEALTH_STATE;
 import com.ctrip.xpipe.utils.StringUtil;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,13 +25,10 @@ public class ConsoleServiceManager {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
+    private Map<String, ConsoleService> services = Maps.newConcurrentMap();
+
     @Autowired
     private ConsoleConfig consoleConfig;
-
-    @PostConstruct
-    public void postConstruct(){
-
-    }
 
     public List<HEALTH_STATE> allHealthStatus(String ip, int port){
 
@@ -46,6 +45,20 @@ public class ConsoleServiceManager {
             }
         }
         return result;
+    }
+
+    public long getDelay(String ip, int port, String activeIdc) {
+        ConsoleService service = services.get(activeIdc);
+        if (service == null) {
+            synchronized (this) {
+                service = services.get(activeIdc);
+                if (service == null) {
+                    service = new DefaultConsoleService(consoleConfig.getConsoleDomains().get(activeIdc.toUpperCase()));
+                    services.put(activeIdc, service);
+                }
+            }
+        }
+        return service.getInstanceDelayStatus(ip, port);
     }
 
     public List<Boolean> allPingStatus(String host, int port) {
@@ -88,7 +101,12 @@ public class ConsoleServiceManager {
         Map<String, ConsoleService> result = new HashMap<>();
 
         for(String url : getConsoleUrls()){
-            result.put(url, new DefaultConsoleService(url));
+            ConsoleService service = services.get(url);
+            if (service == null) {
+                service = new DefaultConsoleService(url);
+                services.put(url, service);
+            }
+            result.put(url, service);
         }
         return result;
     }

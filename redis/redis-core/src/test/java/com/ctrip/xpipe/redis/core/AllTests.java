@@ -6,6 +6,7 @@ import com.ctrip.xpipe.redis.core.meta.MetaCloneTest;
 import com.ctrip.xpipe.redis.core.meta.QuorumConfigTest;
 import com.ctrip.xpipe.redis.core.meta.comparator.ClusterMetaComparatorTest;
 import com.ctrip.xpipe.redis.core.meta.comparator.DcMetaComparatorTest;
+import com.ctrip.xpipe.redis.core.meta.comparator.DcRouteMetaComparatorTest;
 import com.ctrip.xpipe.redis.core.meta.comparator.ShardMetaComparatorTest;
 import com.ctrip.xpipe.redis.core.meta.impl.DefaultXpipeMetaManagerTest;
 import com.ctrip.xpipe.redis.core.metaserver.META_SERVER_SERVICETest;
@@ -24,6 +25,8 @@ import com.ctrip.xpipe.redis.core.proxy.parser.content.DefaultProxyContentParser
 import com.ctrip.xpipe.redis.core.proxy.protocols.DefaultProxyConnectProtocolTest;
 import com.ctrip.xpipe.redis.core.redis.DefaultRunIdGeneratorTest;
 import com.ctrip.xpipe.redis.core.store.ReplicationStoreMetaTest;
+import com.ctrip.xpipe.redis.core.util.SentinelUtil;
+import com.ctrip.xpipe.redis.core.util.SentinelUtilTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -70,7 +73,9 @@ import org.junit.runners.Suite.SuiteClasses;
 	DefaultProxyConnectProtocolParserTest.class,
 	TestForAbstractProxyProtocolParser.class,
 	SessionTrafficResultTest.class,
-	TunnelTrafficResultTest.class
+	TunnelTrafficResultTest.class,
+	DcRouteMetaComparatorTest.class,
+	SentinelUtilTest.class
 })
 public class AllTests {
 

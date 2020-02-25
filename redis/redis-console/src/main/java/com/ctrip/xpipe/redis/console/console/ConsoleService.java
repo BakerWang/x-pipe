@@ -13,4 +13,5 @@ public interface ConsoleService {
 
     Boolean getInstancePingStatus(String ip, int port);
 
+    Long getInstanceDelayStatus(String ip, int port);
 }

@@ -9,6 +9,8 @@ import com.ctrip.xpipe.redis.core.protocal.RedisClientProtocol;
 import com.ctrip.xpipe.redis.core.protocal.protocal.BulkStringEofJudger.JudgeResult;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -17,7 +19,9 @@ import java.io.IOException;
  *
  * 2016年3月28日 下午2:35:36
  */
-public class BulkStringParser extends AbstractRedisClientProtocol<InOutPayload>{
+public class BulkStringParser extends AbstractRedisClientProtocol<InOutPayload> {
+
+	private static final Logger logger = LoggerFactory.getLogger(BulkStringParser.class);
 	
 	private BulkStringEofJudger eofJudger;
 	private BULK_STRING_STATE  bulkStringState = BULK_STRING_STATE.READING_EOF_MARK;
@@ -52,24 +56,24 @@ public class BulkStringParser extends AbstractRedisClientProtocol<InOutPayload>{
 	
 	@Override
 	public RedisClientProtocol<InOutPayload> read(ByteBuf byteBuf){
-		
+
 		switch(bulkStringState){
-		
+
 			case READING_EOF_MARK:
 				eofJudger = readEOfMark(byteBuf);
 				if(eofJudger == null){
 					return null;
 				}
-				
+
 				logger.debug("[read]{}", eofJudger);
 				if(bulkStringParserListener != null){
 					bulkStringParserListener.onEofType(eofJudger.getEofType());
 				}
-				
+
 				bulkStringState = BULK_STRING_STATE.READING_CONTENT;
 				payload.startInput();
 			case READING_CONTENT:
-				
+
 				int readerIndex = byteBuf.readerIndex();
 				JudgeResult result = eofJudger.end(byteBuf.slice());
 				int length = 0;
@@ -83,7 +87,7 @@ public class BulkStringParser extends AbstractRedisClientProtocol<InOutPayload>{
 					throw new RedisRuntimeException("[write to payload exception]" + payload, e);
 				}
 				byteBuf.readerIndex(readerIndex + length);
-				
+
 				if(result.isEnd()){
 					int truncate = eofJudger.truncate();
 					try {
@@ -172,6 +176,11 @@ public class BulkStringParser extends AbstractRedisClientProtocol<InOutPayload>{
 			}
 		}
 		throw new UnsupportedOperationException();		
+	}
+
+	@Override
+	protected Logger getLogger() {
+		return logger;
 	}
 
 	public static interface BulkStringParserListener{

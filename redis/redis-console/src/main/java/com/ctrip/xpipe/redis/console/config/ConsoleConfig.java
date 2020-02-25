@@ -49,9 +49,9 @@ public interface ConsoleConfig extends CoreConfig {
 
 	int getRedisConfCheckIntervalMilli();
 
-	String getConsoleDomain();
+	int getSentinelCheckIntervalMilli();
 
-	Map<String, String> getConsoleCnameToDc();
+	String getConsoleDomain();
 
 	QuorumConfig  getDefaultSentinelQuorumConfig();
 
@@ -59,7 +59,7 @@ public interface ConsoleConfig extends CoreConfig {
 
 	String getXRedisMinimumRequestVersion();
 
-	String getXpipeRuntimeEnvironmentEnvironment();
+	String getXpipeRuntimeEnvironment();
 
 	String getDBAEmails();
 
@@ -77,7 +77,7 @@ public interface ConsoleConfig extends CoreConfig {
 
 	int getRebalanceSentinelMaxNumOnce();
 
-	int getNoAlarmMinutesForNewCluster();
+	int getNoAlarmMinutesForClusterUpdate();
 
 	Set<String> getIgnoredHealthCheckDc();
 
@@ -92,4 +92,14 @@ public interface ConsoleConfig extends CoreConfig {
 	Map<String, String> getSocketStatsAnalyzingKeys();
 
 	Pair<String, String> getClusterShardForMigrationSysCheck();
+
+	String getDatabaseDomainName();
+
+	Map<String, String> getDatabaseIpAddresses();
+
+	int getProxyInfoCollectInterval();
+
+	int getOutterClientCheckInterval();
+
+	Map<String, String> getConsoleDomains();
 }

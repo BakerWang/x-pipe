@@ -1,8 +1,11 @@
 package com.ctrip.xpipe.redis.console.console.impl;
 
+import com.ctrip.xpipe.endpoint.HostPort;
 import com.ctrip.xpipe.redis.console.console.ConsoleService;
 import com.ctrip.xpipe.redis.console.healthcheck.actions.interaction.HEALTH_STATE;
+import com.ctrip.xpipe.redis.console.resources.MetaCache;
 import com.ctrip.xpipe.redis.core.service.AbstractService;
+import com.ctrip.xpipe.tuple.Pair;
 
 /**
  * @author wenchao.meng
@@ -17,6 +20,8 @@ public class DefaultConsoleService extends AbstractService implements ConsoleSer
 
     private final String pingStatusUrl;
 
+    private final String delayStatusUrl;
+
     public DefaultConsoleService(String address){
 
         this.address = address;
@@ -24,7 +29,8 @@ public class DefaultConsoleService extends AbstractService implements ConsoleSer
             this.address = "http://" + this.address;
         }
         healthStatusUrl = String.format("%s/api/health/{ip}/{port}", this.address);
-        pingStatusUrl = String.format("%s/api/ping/{ip}/{port}", this.address);
+        pingStatusUrl = String.format("%s/api/redis/ping/{ip}/{port}", this.address);
+        delayStatusUrl = String.format("%s/api/redis/inner/delay/{ip}/{port}", this.address);
     }
 
     @Override
@@ -35,6 +41,11 @@ public class DefaultConsoleService extends AbstractService implements ConsoleSer
     @Override
     public Boolean getInstancePingStatus(String ip, int port) {
         return restTemplate.getForObject(pingStatusUrl, Boolean.class, ip, port);
+    }
+
+    @Override
+    public Long getInstanceDelayStatus(String ip, int port) {
+        return restTemplate.getForObject(delayStatusUrl, Long.class, ip, port);
     }
 
     @Override

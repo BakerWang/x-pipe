@@ -2,18 +2,19 @@ package com.ctrip.xpipe.redis.console;
 
 
 import com.ctrip.xpipe.redis.console.alert.manager.AlertPolicyManagerTest;
+import com.ctrip.xpipe.redis.console.alert.message.holder.DefaultAlertEntityHolderTest;
 import com.ctrip.xpipe.redis.console.cluster.ConsoleCrossDcServerTest;
 import com.ctrip.xpipe.redis.console.config.impl.DefaultConsoleConfigTest;
 import com.ctrip.xpipe.redis.console.config.impl.DefaultConsoleDbConfigTest;
-import com.ctrip.xpipe.redis.console.controller.api.data.KeeperUpdateControllerTest;
-import com.ctrip.xpipe.redis.console.controller.api.data.MetaUpdateTest;
-import com.ctrip.xpipe.redis.console.controller.api.data.MetaUpdateTest2;
-import com.ctrip.xpipe.redis.console.controller.api.data.MetaUpdateTest3;
+import com.ctrip.xpipe.redis.console.controller.api.data.*;
 import com.ctrip.xpipe.redis.console.controller.api.data.meta.CheckPrepareRequestTest;
 import com.ctrip.xpipe.redis.console.controller.api.data.meta.ClusterCreateInfoTest;
 import com.ctrip.xpipe.redis.console.dal.ConcurrentDalTransactionTest;
 import com.ctrip.xpipe.redis.console.dal.DalTransactionManagerTest;
 import com.ctrip.xpipe.redis.console.dao.*;
+import com.ctrip.xpipe.redis.console.healthcheck.actions.delay.DelayActionTest;
+import com.ctrip.xpipe.redis.console.healthcheck.actions.interaction.RouteHealthEventProcessorTest;
+import com.ctrip.xpipe.redis.console.healthcheck.meta.DefaultDcMetaChangeManagerTest;
 import com.ctrip.xpipe.redis.console.healthcheck.nonredis.clientconfig.CheckClusterTest;
 import com.ctrip.xpipe.redis.console.healthcheck.actions.interaction.DefaultSiteReliabilityCheckerTest;
 import com.ctrip.xpipe.redis.console.healthcheck.actions.interaction.HealthStatusTest;
@@ -33,8 +34,11 @@ import com.ctrip.xpipe.redis.console.healthcheck.nonredis.cluster.ClusterHealthS
 import com.ctrip.xpipe.redis.console.healthcheck.nonredis.cluster.impl.DefaultClusterHealthMonitorManagerTest;
 import com.ctrip.xpipe.redis.console.healthcheck.nonredis.cluster.impl.DefaultClusterHealthMonitorTest;
 import com.ctrip.xpipe.redis.console.healthcheck.nonredis.cluster.impl.DefaultLeveledEmbededSetTest;
+import com.ctrip.xpipe.redis.console.healthcheck.nonredis.metacache.MetaCacheCheckTest;
 import com.ctrip.xpipe.redis.console.healthcheck.nonredis.migration.MigrationSystemAvailableCheckTest;
+import com.ctrip.xpipe.redis.console.healthcheck.nonredis.sentinelconfig.SentinelConfigCheckTest;
 import com.ctrip.xpipe.redis.console.migration.SingleShardMigrationTest;
+import com.ctrip.xpipe.redis.console.migration.manager.DefaultMigrationEventManagerTest;
 import com.ctrip.xpipe.redis.console.migration.model.DefaultMigrationClusterTest;
 import com.ctrip.xpipe.redis.console.migration.model.DefaultMigrationShardTest;
 import com.ctrip.xpipe.redis.console.migration.model.impl.DefaultShardMigrationResultTest;
@@ -56,6 +60,7 @@ import com.ctrip.xpipe.redis.console.service.meta.impl.AdvancedDcMetaServiceTest
 import com.ctrip.xpipe.redis.console.service.meta.impl.AdvancedDcMetaServiceTestForRoute;
 import com.ctrip.xpipe.redis.console.service.meta.impl.ClusterMetaServiceImplTest;
 import com.ctrip.xpipe.redis.console.service.migration.impl.DefaultCheckMigrationCommandBuilderTest;
+import com.ctrip.xpipe.redis.console.service.migration.impl.MigrationServiceImplPaginationTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -74,7 +79,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
         ClusterServiceImplTest.class,
         RedisServiceImplTest.class,
-        KeepercontainerServiceImplTest.class,
+        KeeperContainerServiceImplTest.class,
         ShardServiceImplTest.class,
         ShardServiceImplTest2.class,
         SentinelServiceImplTest.class,
@@ -156,7 +161,17 @@ import org.junit.runners.Suite.SuiteClasses;
         DefaultClusterHealthMonitorTest.class,
         DefaultClusterHealthMonitorManagerTest.class,
         MigrationSystemAvailableCheckTest.class,
-        DefaultCheckMigrationCommandBuilderTest.class
+        DefaultCheckMigrationCommandBuilderTest.class,
+        DefaultAlertEntityHolderTest.class,
+        SentinelUpdateControllerTest.class,
+        DefaultDcMetaChangeManagerTest.class,
+        MetaCacheCheckTest.class,
+        RouteHealthEventProcessorTest.class,
+        DefaultMigrationEventManagerTest.class,
+        MigrationServiceImplPaginationTest.class,
+        SentinelConfigCheckTest.class,
+        ClusterServiceImplTest4.class,
+        DelayActionTest.class
 })
 public class AllTests {
 

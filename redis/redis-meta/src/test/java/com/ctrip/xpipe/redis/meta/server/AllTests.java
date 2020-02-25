@@ -5,6 +5,7 @@ import com.ctrip.xpipe.redis.meta.server.cluster.ClusterServersApiTest;
 import com.ctrip.xpipe.redis.meta.server.cluster.impl.*;
 import com.ctrip.xpipe.redis.meta.server.dchange.impl.AtLeastOneCheckerTest;
 import com.ctrip.xpipe.redis.meta.server.dchange.impl.DefaultOffsetwaiterTest;
+import com.ctrip.xpipe.redis.meta.server.dchange.impl.DefaultSentinelManagerTest;
 import com.ctrip.xpipe.redis.meta.server.dchange.impl.FirstNewMasterChooserTest;
 import com.ctrip.xpipe.redis.meta.server.impl.DefaultMetaServersTest;
 import com.ctrip.xpipe.redis.meta.server.job.DefaultSlaveOfJobTest;
@@ -23,6 +24,7 @@ import com.ctrip.xpipe.redis.meta.server.keeper.manager.DeleteKeeperCommandTest;
 import com.ctrip.xpipe.redis.meta.server.meta.CurrentMetaTest;
 import com.ctrip.xpipe.redis.meta.server.meta.MetaJacksonTest;
 import com.ctrip.xpipe.redis.meta.server.meta.impl.DefaultCurrentMetaManagerTest;
+import com.ctrip.xpipe.redis.meta.server.meta.impl.DefaultDcMetaCacheRefreshTest;
 import com.ctrip.xpipe.redis.meta.server.meta.impl.DefaultDcMetaCacheTest;
 import com.ctrip.xpipe.redis.meta.server.rest.ForwardInfoEditorTest;
 import com.ctrip.xpipe.redis.meta.server.rest.ForwardInfoTest;
@@ -67,7 +69,10 @@ import org.junit.runners.Suite.SuiteClasses;
 	DefaultSlaveOfJobTest.class,
 	DefaultKeeperStateControllerTest.class,
 	KeeperStateChangeJobTest.class,
-	DefaultKeeperStateChangeHandlerTest.class
+	DefaultKeeperStateChangeHandlerTest.class,
+	DeferredResponseTest.class,
+	DefaultSentinelManagerTest.class,
+	DefaultDcMetaCacheRefreshTest.class
 })
 public class AllTests {
 

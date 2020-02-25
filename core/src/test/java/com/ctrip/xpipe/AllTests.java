@@ -2,10 +2,7 @@ package com.ctrip.xpipe;
 
 import com.ctrip.xpipe.api.sso.SsoConfigTest;
 import com.ctrip.xpipe.command.*;
-import com.ctrip.xpipe.concurrent.DefaultExecutorFactoryTest;
-import com.ctrip.xpipe.concurrent.FinalStateSetterManagerTest;
-import com.ctrip.xpipe.concurrent.KeyedOneThreadTaskExecutorTest;
-import com.ctrip.xpipe.concurrent.OneThreadTaskExecutorTest;
+import com.ctrip.xpipe.concurrent.*;
 import com.ctrip.xpipe.endpoint.ClusterShardHostPortTest;
 import com.ctrip.xpipe.endpoint.DefaultEndPointTest;
 import com.ctrip.xpipe.endpoint.TestAbstractLifecycle;
@@ -17,6 +14,7 @@ import com.ctrip.xpipe.payload.ByteArrayOutputStreamPayloadTest;
 import com.ctrip.xpipe.payload.ByteArrayWritableByteChannelTest;
 import com.ctrip.xpipe.pool.XpipeNettyClientKeyedObjectPoolTest;
 import com.ctrip.xpipe.pool.XpipeNettyClientPoolTest;
+import com.ctrip.xpipe.spring.DomainValidateFilterTest;
 import com.ctrip.xpipe.spring.RestTemplateFactoryTest;
 import com.ctrip.xpipe.tuple.PairTest;
 import com.ctrip.xpipe.utils.*;
@@ -73,6 +71,11 @@ import org.junit.runners.Suite.SuiteClasses;
 	UrlUtilsTest.class,
 	DefaultExecutorFactoryTest.class,
 	PairTest.class,
+	DomainValidateFilterTest.class,
+	CausalCommandTest.class,
+	CausalChainTest.class,
+	MutexableOneThreadTaskExecutorTest.class,
+	KeyedOneThreadMutexableTaskExecutorTest.class
 })
 public class AllTests {
 
